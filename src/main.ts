@@ -31,6 +31,7 @@ export default class HetiPlugin extends Plugin {
       }
     });
 
+    this.registerEditorExtension(viewModeField);
     this.registerEditorExtension(createModeSwitcher(this));
     this.registerEditorExtension(createFormWidget(this));
 
