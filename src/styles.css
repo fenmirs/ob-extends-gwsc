@@ -30,3 +30,13 @@
 }
 .heti-ruby-modal .modal-content { padding: 16px; }
 .heti-ruby-modal h3 { margin-top: 0; }
+
+.markdown-preview-section .heti { max-width: 100%; padding: 16px; }
+.markdown-preview-section .heti--vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  max-height: 80vh;
+  overflow-x: auto;
+}
+.markdown-preview-section .heti ruby { ruby-align: center; }
+.markdown-preview-section .heti rt { font-size: 0.5em; }

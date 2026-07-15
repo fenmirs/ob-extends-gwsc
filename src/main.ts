@@ -23,6 +23,12 @@ export default class HetiPlugin extends Plugin {
       if (!hetiType) return;
       el.addClass("heti");
       if (TYPE_MAP[hetiType]) el.addClass(TYPE_MAP[hetiType]);
+
+      // 竖排模式特殊处理
+      if (hetiType === "vertical") {
+        el.style.writingMode = "vertical-rl";
+        el.style.textOrientation = "upright";
+      }
     });
 
     // 编辑器工具栏
