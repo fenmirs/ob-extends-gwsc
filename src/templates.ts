@@ -7,7 +7,7 @@ export interface PoemTemplateOptions {
 }
 
 function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 function generateLines(count: number): string {
@@ -40,10 +40,14 @@ ${generateLines(lines)}
 </div>`;
 }
 
+function escapeYamlValue(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export function generateFrontmatter(dynasty?: string, author?: string): string {
   let fm = "---\nheti: poetry\n";
-  if (dynasty) fm += `朝代: ${dynasty}\n`;
-  if (author) fm += `作者: ${author}\n`;
+  if (dynasty) fm += `朝代: "${escapeYamlValue(dynasty)}"\n`;
+  if (author) fm += `作者: "${escapeYamlValue(author)}"\n`;
   fm += "---\n\n";
   return fm;
 }
