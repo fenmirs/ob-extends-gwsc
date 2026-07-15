@@ -1,69 +1,96 @@
-# Task 7: 集成测试
+### Task 7: 集成到 main.ts
 
-## Goal
-创建测试用的诗词文件，验证插件功能。
+**Files:**
+- Modify: `src/main.ts:1-66`
 
-## Files to Create
-- Create: `test-poem.md`
-- Create: `test-ancient.md`
-- Create: `test-embed.md`
+**Interfaces:**
+- Consumes: `createModeSwitcher` from `src/mode-switcher.ts`, `createFormWidget` from `src/form-widget.ts`, `viewModeField`, `setViewMode` from `src/view-mode.ts`
 
-## Steps
+- [ ] **Step 1: 更新 main.ts**
 
-### Step 1: 创建测试诗词 test-poem.md
-```markdown
----
-heti: poetry
-朝代: 唐
-作者: 李白
----
+```typescript
+// src/main.ts
+import { Plugin, MarkdownView } from "obsidian";
+import { createModeSwitcher } from "./mode-switcher";
+import { createFormWidget } from "./form-widget";
+import { viewModeField, setViewMode } from "./view-mode";
 
-<div class="heti heti--poetry">
-  <h2>赠汪伦<span class="heti-meta heti-small">[唐]<abbr title="号青莲居士">李白</abbr></span></h2>
-  <p class="heti-x-large">
-    李白乘舟将欲行<span class="heti-hang">，</span><br>
-    忽闻岸上踏歌声<span class="heti-hang">。</span><br>
-    桃花潭水深千尺<span class="heti-hang">，</span><br>
-    不及汪伦送我情<span class="heti-hang">。</span>
-  </p>
-</div>
+const TYPE_MAP: Record<string, string> = {
+  poetry: "heti--poetry",
+  ancient: "heti--ancient",
+  annotation: "heti--annotation",
+  vertical: "heti--vertical",
+};
+
+export { TYPE_MAP };
+
+export default class HetiPlugin extends Plugin {
+  async onload() {
+    console.log("Heti 插件已加载");
+
+    this.registerMarkdownPostProcessor((el, ctx) => {
+      const cache = this.app.metadataCache.getFileCache(
+        this.app.vault.getAbstractFileByPath(ctx.sourcePath) as any
+      );
+      const hetiType = cache?.frontmatter?.heti;
+      if (!hetiType) return;
+      el.addClass("heti");
+      if (TYPE_MAP[hetiType]) el.addClass(TYPE_MAP[hetiType]);
+
+      if (hetiType === "vertical") {
+        el.style.writingMode = "vertical-rl";
+        el.style.textOrientation = "upright";
+      }
+    });
+
+    this.registerEditorExtension(createModeSwitcher(this));
+    this.registerEditorExtension(createFormWidget(this));
+
+    this.addCommand({
+      id: "new-poem",
+      name: "新建诗词",
+      callback: () => this.createNewPoem(),
+    });
+  }
+
+  async createNewPoem() {
+    const leaf = this.app.workspace.getLeaf();
+    const folderPath = "诗词";
+    if (!(await this.app.vault.adapter.exists(folderPath))) {
+      await this.app.vault.createFolder(folderPath);
+    }
+    const baseName = `${folderPath}/新建诗词`;
+    let filePath = `${baseName}.md`;
+    let counter = 1;
+    while (await this.app.vault.adapter.exists(filePath)) {
+      filePath = `${baseName} ${counter}.md`;
+      counter++;
+    }
+    const file = await this.app.vault.create(
+      filePath,
+      '---\nheti: poetry\n朝代: \n作者: \n---\n\n<div class="heti heti--poetry">\n  <h2>标题<span class="heti-meta heti-small">[朝代]<abbr title="">作者</abbr></span></h2>\n  <p class="heti-x-large">\n    \n  </p>\n</div>'
+    );
+    await leaf.openFile(file);
+  }
+
+  onunload() {
+    console.log("Heti 插件已卸载");
+  }
+}
 ```
 
-### Step 2: 创建测试古文 test-ancient.md
-```markdown
----
-heti: ancient
-朝代: 三国
-作者: 诸葛亮
----
+- [ ] **Step 2: 删除旧工具栏引用**
 
-<div class="heti heti--ancient">
-  <h2>出师表<span class="heti-meta heti-small">[三国]<abbr title="字孔明">诸葛亮</abbr></span></h2>
-  <p>先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。</p>
-</div>
-```
+确保 `src/main.ts` 中不再引用 `./toolbar`。
 
-### Step 3: 创建测试嵌入 test-embed.md
-```markdown
-# 诗词合集
+- [ ] **Step 3: 运行构建**
 
-![[test-poem]]
+Run: `npm run build`
+Expected: 构建成功，main.js 更新
 
-![[test-ancient]]
-```
+- [ ] **Step 4: 提交**
 
-### Step 4: 最终构建验证
 ```bash
-npm run build
+git add src/main.ts
+git commit -m "feat: integrate form UI into plugin"
 ```
-
-### Step 5: Commit
-```bash
-git add -A
-git commit -m "feat: add test poems and finalize plugin"
-```
-
-## Verification
-- 三个测试文件创建成功
-- 文件内容正确包含 frontmatter 和 Heti HTML
-- `npm run build` 成功

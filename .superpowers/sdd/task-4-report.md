@@ -1,21 +1,31 @@
-# Task 4 Report: 编辑器工具栏
+# Task 4 Report: 拼音键盘组件
 
-## What Was Implemented
-- **Editor toolbar widget** (`src/toolbar.ts`): A CodeMirror 6 `ViewPlugin` that injects a toolbar at the top of the editor with 4 buttons:
-  - 插入模板: Inserts poem template with frontmatter
-  - 换行: Inserts HTML line break with proper punctuation handling (`heti-hang`)
-  - 注音: Opens RubyModal for pinyin annotation
-  - 横竖排: Toggles frontmatter `heti` field between vertical/poetry
-- **RubyModal stub** (`src/ruby-modal.ts`): Minimal stub with `RubyModal` class and `buildRubyHtml` helper for compilation (Task 5 will replace with full implementation)
-- **Updated main.ts**: Registers editor extension and adds "新建诗词" command
+**Status:** DONE
 
-## Build Verification
-- `npm run build` completed successfully with no errors or warnings.
+## What I Implemented
 
-## Files Created/Modified
-- **Created**: `src/toolbar.ts`
-- **Created**: `src/ruby-modal.ts` (stub)
-- **Modified**: `src/main.ts` — added imports for toolbar, `TYPE_MAP` export, editor extension registration, and command registration
+Created `src/pinyin-keyboard.ts` exactly per the task brief, containing:
+- `INITIALS` — 23 pinyin initials
+- `FINALS` — 35 pinyin finals
+- `TONES` / `TONE_LABELS` — 4 tone marks
+- `applyTone()` — applies a tone diacritic to a vowel string
+- `PinyinKeyboard` class — Obsidian-style DOM component with preview, initial/final/tone button rows, and clear/confirm actions
 
-## Issues Encountered
-None.
+## Testing
+
+- `npx tsc --noEmit` — `pinyin-keyboard.ts` compiles with zero errors (4 pre-existing errors in Obsidian type defs and `toolbar.ts` are unrelated)
+
+## Files Changed
+
+- Created: `src/pinyin-keyboard.ts` (176 lines)
+
+## Commit
+
+- `4e21f8b` — feat: add pinyin keyboard component
+
+## Self-Review
+
+- Implementation matches the brief exactly
+- `CharData` import is present (consumed as interface dependency per spec)
+- `createEl` is used consistently with Obsidian's augmented HTMLElement (same pattern as existing code)
+- No overbuilding; no extra logic beyond the spec

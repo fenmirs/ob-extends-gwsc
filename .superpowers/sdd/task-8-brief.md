@@ -1,52 +1,259 @@
-# Task 8: README 文档
+### Task 8: 样式
 
-## Goal
-创建 README.md 文档，说明插件功能和使用方法。
+**Files:**
+- Modify: `src/styles.css`
 
-## Files to Create
-- Create: `README.md`
+**Interfaces:**
+- Consumes: class names from `form-widget.ts`, `char-card.ts`, `pinyin-keyboard.ts`, `mode-switcher.ts`
 
-## Steps
+- [ ] **Step 1: 更新样式文件**
 
-### Step 1: 创建 README.md
-```markdown
-# Obsidian Heti 中文排版增强
+```css
+/* 模式切换栏 */
+.heti-mode-switcher {
+  display: flex;
+  gap: 4px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+.heti-mode-btn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+.heti-mode-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+.heti-mode-btn.active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
 
-基于 [Heti CSS](https://sivan.github.io/heti/) 的 Obsidian 插件，为中文诗词和古文提供专业排版增强。
+/* 表单区域 */
+.heti-poem-form {
+  padding: 16px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.heti-form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.heti-form-label {
+  min-width: 60px;
+  font-weight: 500;
+  font-size: 14px;
+}
+.heti-form-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+.heti-form-select {
+  padding: 6px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+.heti-form-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.heti-form-line {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+}
+.heti-form-line input {
+  flex: 1;
+}
+.heti-form-line-delete {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+}
+.heti-form-line-delete:hover {
+  color: var(--text-error);
+}
+.heti-form-add-line {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--background-secondary);
+  border: 1px dashed var(--background-modifier-border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+.heti-form-add-line:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
 
-## 功能
-- 编辑器工具栏：插入模板、换行、注音、横竖排切换
-- 阅读模式自动应用 Heti 排版
-- 每首诗词独立文件，便于管理和复用
-- 支持嵌入到其他笔记中
+/* 单字卡片容器 */
+.heti-char-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 40px;
+}
 
-## 使用
-1. `Ctrl+P` → "新建诗词"
-2. 编辑器顶部工具栏操作
-3. 注音：选中文字 → 点击注音 → 输入拼音
+/* 单字卡片 */
+.heti-char-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  cursor: pointer;
+  min-width: 40px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.heti-char-card:hover {
+  border-color: var(--interactive-accent);
+  background: var(--background-secondary);
+}
+.heti-char-card.active {
+  border-color: var(--interactive-accent);
+  background: var(--interactive-accent-hover);
+}
+.heti-char {
+  font-size: 18px;
+  font-weight: 500;
+}
+.heti-char-pinyin {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.heti-char-delete {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+  font-size: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+.heti-char-card.hovered .heti-char-delete {
+  display: flex;
+}
+.heti-char-delete:hover {
+  background: var(--text-error);
+  color: var(--text-on-accent);
+}
 
-## Frontmatter
-```yaml
----
-heti: poetry  # poetry | ancient | annotation | vertical
-朝代: 唐
-作者: 李白
----
+/* 拼音键盘容器 */
+.heti-char-keyboard-container {
+  display: none;
+  width: 100%;
+}
+
+/* 拼音键盘 */
+.heti-pinyin-keyboard {
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-secondary);
+  margin-top: 4px;
+}
+.heti-pinyin-preview {
+  padding: 8px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: 8px;
+}
+.heti-pinyin-text {
+  color: var(--text-normal);
+}
+.heti-pinyin-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+.heti-pinyin-row-indent {
+  padding-left: 44px;
+}
+.heti-pinyin-label {
+  min-width: 40px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.heti-pinyin-btn {
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.1s;
+}
+.heti-pinyin-btn:hover {
+  background: var(--background-modifier-hover);
+}
+.heti-pinyin-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+.heti-pinyin-confirm {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+.heti-pinyin-confirm:hover {
+  opacity: 0.9;
+}
 ```
 
-## 嵌入复用
-其他笔记可以通过 Obsidian 的嵌入语法引用诗词：
-```markdown
-![[赠汪伦]]
-```
-```
+- [ ] **Step 2: 复制样式到插件根目录**
 
-### Step 2: Commit
+Run: `Copy-Item src/styles.css styles.css`
+
+- [ ] **Step 3: 运行构建**
+
+Run: `npm run build`
+Expected: 构建成功
+
+- [ ] **Step 4: 提交**
+
 ```bash
-git add -A
-git commit -m "docs: add README"
+git add src/styles.css styles.css
+git commit -m "feat: add form UI styles"
 ```
-
-## Verification
-- README.md 文件存在
-- 内容包含功能说明、使用方法、Frontmatter 格式

@@ -1,45 +1,41 @@
-# Task 1: 项目脚手架 — 完成报告
+# Task 1: 数据结构和 HTML 生成 — Report
 
-## 完成状态: ✅ Done
+## What I Implemented
 
-## 实现内容
+Created `src/poem-data.ts` with:
+- **Data interfaces:** `CharData`, `PoemLine`, `PoemFormData`
+- **Utility functions:** `createEmptyForm()`, `textToChars()`, `charsToText()`, `textToLine()`
+- **HTML generation:** `escapeHtml()`, `escapeYamlValue()`, `buildRubyHtml()`, `generatePoemHtml()` — produces full frontmatter + HTML from `PoemFormData`
+- **HTML parsing:** `parseExistingPoem()` — extracts `PoemFormData` from existing rendered HTML + frontmatter
 
-创建了 Obsidian 插件项目的基础脚手架，包含完整的构建配置和 TypeScript 配置。
+Emptied `src/templates.ts` (removed `generatePoemTemplate`, `generateFrontmatter`, `escapeHtml`, `generateLines`, `escapeYamlValue`, `PoemTemplateOptions`).
 
-## 文件创建清单
+Updated `src/toolbar.ts` to import from `poem-data.ts` instead of `templates.ts`, and adapted `insertTemplate()` to use `generatePoemHtml(createEmptyForm())`.
 
-| 文件 | 说明 |
-|------|------|
-| `package.json` | 项目配置，包含 esbuild、TypeScript、obsidian 等依赖 |
-| `tsconfig.json` | TypeScript 编译配置，ESNext 模块 + ES6 目标 |
-| `esbuild.config.mjs` | 构建脚本，支持 dev watch 和 production 构建 |
-| `manifest.json` | Obsidian 插件清单，id: obsidian-heti |
-| `versions.json` | 版本兼容映射 |
-| `.gitignore` | 忽略 node_modules/、main.js、data.json |
-| `src/main.ts` | 插件入口，HetiPlugin extends Plugin |
-| `src/styles.css` | 工具栏基础样式（.heti-toolbar、.heti-toolbar-btn） |
-| `assets/.gitkeep` | 空目录占位 |
+## Files Changed
 
-## 构建验证
+| File | Action |
+|------|--------|
+| `src/poem-data.ts` | Created — 144 lines |
+| `src/templates.ts` | Emptied — 3 lines (deprecation comment + empty export) |
+| `src/toolbar.ts` | Modified — import + `insertTemplate()` updated |
 
-```
-npm run build  →  ✅ 成功
-main.js 生成   →  ✅ 1232 bytes
-```
+## Typecheck Results
 
-## Git 提交
+`npx tsc --noEmit` output:
+- 3 pre-existing obsidian type definition errors (HistoryHandler) — not from this change
+- 1 pre-existing error in `toolbar.ts:137` (`metadataCache.off()` args) — not from this change
+- **0 new errors introduced**
 
-```
-commit 5c454f3: feat: scaffold Obsidian plugin project
-14 files changed, 1806 insertions(+)
-```
+## Self-Review
 
-## 问题与注意事项
+**Completeness:** All items in the task brief implemented — data structures, generation, parsing, templates.ts cleanup.
 
-- CRLF 警告（Windows 环境正常现象，不影响功能）
-- `assets/` 目录用 `.gitkeep` 占位以确保 git 跟踪空目录
-- `main.js` 已在 `.gitignore` 中，不进入版本控制（发布时由 CI 或本地构建生成）
+**Quality:** 
+- `parseExistingPoem` uses a regex to parse ruby tags; the regex handles the `|.` fallback for non-ruby characters correctly
+- `generatePoemHtml` includes frontmatter + HTML in a single output, matching the original combined behavior
+- Escape functions handle the required characters (HTML entities, YAML backslash/quote escaping)
 
-## 自审结论
-
-所有文件内容与 task-1-brief 完全一致，构建成功，无遗漏。
+**Concerns:**
+- `parseExistingPoem` regex `/<ruby>(.*?)<rt>(.*?)<\/rt><\/ruby>|./g` processes one character at a time for non-ruby content, which is correct but may be slow for very long texts (not a real concern for poems)
+- The `toolbar.ts` `insertTemplate` uses a regex to strip frontmatter from `generatePoemHtml` output when content already has frontmatter — this works but is fragile; later tasks should refactor this flow

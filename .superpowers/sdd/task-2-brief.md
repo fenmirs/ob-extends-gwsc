@@ -1,65 +1,40 @@
-# Task 2: 集成 Heti CSS
+### Task 2: 视图模式 StateField
 
-## Goal
-下载 Heti CSS 并集成到插件中，注册阅读模式的 PostProcessor，为后续的排版功能奠定基础。
+**Files:**
+- Create: `src/view-mode.ts`
 
-## Files to Create/Modify
-- Create: `assets/heti.min.css`
-- Modify: `src/main.ts`
+**Interfaces:**
+- Produces: `viewModeField`, `setViewMode`, `ViewMode`
 
-## Steps
+- [ ] **Step 1: 创建 StateField**
 
-### Step 1: 下载 heti.min.css
-```bash
-curl -L "https://unpkg.com/heti/umd/heti.min.css" -o assets/heti.min.css
-```
-
-### Step 2: 修改 src/main.ts — 注册阅读模式 PostProcessor
 ```typescript
-import { Plugin, MarkdownView } from "obsidian";
+// src/view-mode.ts
+import { StateField, StateEffect } from "@codemirror/state";
 
-export default class HetiPlugin extends Plugin {
-  async onload() {
-    console.log("Heti 插件已加载");
+export type ViewMode = "form" | "source" | "preview";
 
-    this.registerMarkdownPostProcessor((el, ctx) => {
-      const cache = this.app.metadataCache.getFileCache(
-        this.app.vault.getAbstractFileByPath(ctx.sourcePath) as any
-      );
-      const hetiType = cache?.frontmatter?.heti;
-      if (!hetiType) return;
+export const setViewMode = StateEffect.define<ViewMode>();
 
-      el.addClass("heti");
-      const typeMap: Record<string, string> = {
-        poetry: "heti--poetry",
-        ancient: "heti--ancient",
-        annotation: "heti--annotation",
-        vertical: "heti--vertical",
-      };
-      if (typeMap[hetiType]) {
-        el.addClass(typeMap[hetiType]);
-      }
-    });
-  }
-
-  onunload() {
-    console.log("Heti 插件已卸载");
-  }
-}
+export const viewModeField = StateField.define<ViewMode>({
+  create: () => "form",
+  update(value, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(setViewMode)) return effect.value;
+    }
+    return value;
+  },
+});
 ```
 
-### Step 3: 验证构建
+- [ ] **Step 2: 运行类型检查**
+
+Run: `npx tsc --noEmit`
+Expected: 无错误
+
+- [ ] **Step 3: 提交**
+
 ```bash
-npm run build
+git add src/view-mode.ts
+git commit -m "feat: add view mode state field"
 ```
-
-### Step 4: Commit
-```bash
-git add -A
-git commit -m "feat: integrate Heti CSS and reading view post-processor"
-```
-
-## Verification
-- `assets/heti.min.css` 文件存在且内容非空
-- `npm run build` 成功
-- main.ts 中包含 registerMarkdownPostProcessor 逻辑

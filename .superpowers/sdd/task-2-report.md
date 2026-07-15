@@ -1,20 +1,27 @@
-# Task 2 Report: 集成 Heti CSS
+# Task 2: 视图模式 StateField — Report
 
-## What was implemented
-- Downloaded `heti.min.css` (18,922 bytes) from unpkg to `assets/heti.min.css`
-- Modified `src/main.ts` to register a `MarkdownPostProcessor` that:
-  - Reads the `heti` frontmatter key from each note
-  - Adds the `heti` base class to the rendered element
-  - Maps frontmatter values (`poetry`, `ancient`, `annotation`, `vertical`) to corresponding Heti modifier classes
+## What I implemented
 
-## Build verification
-- `npm run build` — succeeded with no errors
+Created `src/view-mode.ts` with:
+- `ViewMode` type union: `"form" | "source" | "preview"`
+- `setViewMode` StateEffect for dispatching mode changes
+- `viewModeField` StateField that defaults to `"form"` and applies effects on transactions
 
-## Files changed
-| File | Action |
-|---|---|
-| `assets/heti.min.css` | Created (downloaded) |
-| `src/main.ts` | Modified (added PostProcessor) |
+Exactly as specified in the task brief — no deviations.
 
-## Issues
-- None. Download and build both completed cleanly.
+## Type check
+
+`npx tsc --noEmit` — no errors from `view-mode.ts`. Pre-existing errors only:
+- `obsidian.d.ts` type mismatches (Obsidian version issue)
+- `src/toolbar.ts:137` missing argument (unrelated)
+
+## Commit
+
+`7dab840` — `feat: add view mode state field`
+
+## Self-review
+
+- Code matches the brief exactly
+- No overengineering, no unnecessary additions
+- Follows CM6 idioms (StateEffect + StateField pattern)
+- Clean, minimal, 15 lines

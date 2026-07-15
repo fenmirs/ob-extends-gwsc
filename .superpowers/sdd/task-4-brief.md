@@ -1,218 +1,202 @@
-# Task 4: 编辑器工具栏
+### Task 4: 拼音键盘组件
 
-## Goal
-创建编辑器工具栏，提供插入模板、换行、注音、横竖排切换按钮。同时修改 main.ts 注册工具栏和命令。
+**Files:**
+- Create: `src/pinyin-keyboard.ts`
 
-## Files to Create/Modify
-- Create: `src/toolbar.ts`
-- Modify: `src/main.ts`
+**Interfaces:**
+- Consumes: `CharData` from `src/poem-data.ts`
+- Produces: `PinyinKeyboard`, `PINYIN_DATA`
 
-## Important Dependency Note
-
-Task 4's toolbar code imports from `./ruby-modal` which is created in Task 5. For Task 4 to compile, you MUST create a minimal stub for `src/ruby-modal.ts` with the required exports:
+- [ ] **Step 1: 创建拼音数据和键盘组件**
 
 ```typescript
-// src/ruby-modal.ts - STUB for Task 4 compilation
-import { App, Modal } from "obsidian";
+// src/pinyin-keyboard.ts
+import { CharData } from "./poem-data";
 
-export class RubyModal extends Modal {
-  private selectedText: string;
-  private onSubmit: (pinyin: string) => void;
+export const INITIALS = [
+  "b", "p", "m", "f", "d", "t", "n", "l",
+  "g", "k", "h", "j", "q", "x",
+  "zh", "ch", "sh", "r", "z", "c", "s", "y", "w",
+];
 
-  constructor(app: App, selectedText: string, onSubmit: (pinyin: string) => void) {
-    super(app);
-    this.selectedText = selectedText;
-    this.onSubmit = onSubmit;
+export const FINALS = [
+  "a", "o", "e", "i", "u", "ü",
+  "ai", "ei", "ao", "ou", "an", "en", "ang", "eng", "ong",
+  "ia", "ie", "iu", "iao", "ian", "in", "iang", "ing", "iong",
+  "ua", "uo", "uai", "ui", "uan", "un", "uang",
+  "üe", "üan", "ün",
+];
+
+export const TONES = ["\u0304", "\u0301", "\u030C", "\u0300"];
+
+export const TONE_LABELS = ["ˉ", "ˊ", "ˇ", "ˋ"];
+
+export function applyTone(vowel: string, tone: string): string {
+  const toneIndex = TONES.indexOf(tone);
+  if (toneIndex === -1) return vowel;
+  const baseVowels = "aeiouü";
+  const toned = [
+    ["ā", "á", "ǎ", "à"],
+    ["ē", "é", "ě", "è"],
+    ["ī", "í", "ǐ", "ì"],
+    ["ō", "ó", "ǒ", "ò"],
+    ["ū", "ú", "ǔ", "ù"],
+    ["ǖ", "ǘ", "ǚ", "ǜ"],
+  ];
+  for (let i = 0; i < baseVowels.length; i++) {
+    if (vowel.includes(baseVowels[i])) {
+      return vowel.replace(baseVowels[i], toned[i][toneIndex]);
+    }
+  }
+  return vowel;
+}
+
+export class PinyinKeyboard {
+  private container: HTMLElement;
+  private previewEl: HTMLElement;
+  private initial = "";
+  private final = "";
+  private tone = "";
+  private onConfirm: (pinyin: string) => void;
+  private onClear: () => void;
+
+  constructor(
+    onConfirm: (pinyin: string) => void,
+    onClear: () => void
+  ) {
+    this.onConfirm = onConfirm;
+    this.onClear = onClear;
+    this.container = document.createElement("div");
+    this.container.className = "heti-pinyin-keyboard";
+    this.build();
+    this.previewEl = this.container.querySelector(".heti-pinyin-preview")!;
   }
 
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.createEl("h3", { text: "注音（Task 5 实现）" });
-    const input = contentEl.createEl("input", { type: "text" });
-    const btn = contentEl.createEl("button", { text: "确认" });
-    btn.addEventListener("click", () => {
-      this.onSubmit(input.value);
-      this.close();
+  getElement(): HTMLElement {
+    return this.container;
+  }
+
+  private build() {
+    const preview = this.container.createEl("div", {
+      cls: "heti-pinyin-preview",
+    });
+    preview.createEl("span", { cls: "heti-pinyin-text", text: "点击选择声母、韵母、声调" });
+
+    const initialRow = this.container.createEl("div", {
+      cls: "heti-pinyin-row",
+    });
+    initialRow.createEl("span", { cls: "heti-pinyin-label", text: "声母:" });
+    INITIALS.forEach((ini) => {
+      const btn = initialRow.createEl("button", {
+        cls: "heti-pinyin-btn",
+        text: ini,
+      });
+      btn.addEventListener("click", () => {
+        this.initial = ini;
+        this.updatePreview();
+      });
+    });
+
+    const finalRow1 = this.container.createEl("div", {
+      cls: "heti-pinyin-row",
+    });
+    finalRow1.createEl("span", { cls: "heti-pinyin-label", text: "韵母:" });
+    FINALS.slice(0, 15).forEach((fin) => {
+      const btn = finalRow1.createEl("button", {
+        cls: "heti-pinyin-btn",
+        text: fin,
+      });
+      btn.addEventListener("click", () => {
+        this.final = fin;
+        this.updatePreview();
+      });
+    });
+
+    const finalRow2 = this.container.createEl("div", {
+      cls: "heti-pinyin-row heti-pinyin-row-indent",
+    });
+    FINALS.slice(15).forEach((fin) => {
+      const btn = finalRow2.createEl("button", {
+        cls: "heti-pinyin-btn",
+        text: fin,
+      });
+      btn.addEventListener("click", () => {
+        this.final = fin;
+        this.updatePreview();
+      });
+    });
+
+    const toneRow = this.container.createEl("div", {
+      cls: "heti-pinyin-row",
+    });
+    toneRow.createEl("span", { cls: "heti-pinyin-label", text: "声调:" });
+    TONE_LABELS.forEach((label, i) => {
+      const btn = toneRow.createEl("button", {
+        cls: "heti-pinyin-btn",
+        text: label,
+      });
+      btn.addEventListener("click", () => {
+        this.tone = TONES[i];
+        this.updatePreview();
+      });
+    });
+
+    const actions = this.container.createEl("div", {
+      cls: "heti-pinyin-actions",
+    });
+    const clearBtn = actions.createEl("button", {
+      cls: "heti-pinyin-btn heti-pinyin-clear",
+      text: "清除",
+    });
+    clearBtn.addEventListener("click", () => {
+      this.initial = "";
+      this.final = "";
+      this.tone = "";
+      this.onClear();
+      this.updatePreview();
+    });
+
+    const confirmBtn = actions.createEl("button", {
+      cls: "heti-pinyin-btn heti-pinyin-confirm mod-cta",
+      text: "确认",
+    });
+    confirmBtn.addEventListener("click", () => {
+      const pinyin = this.getPinyin();
+      if (pinyin) this.onConfirm(pinyin);
     });
   }
 
-  onClose() { this.contentEl.empty(); }
-}
-
-export function buildRubyHtml(characters: string, pinyin: string): string {
-  return `<ruby>${characters}<rt>${pinyin}</rt></ruby>`;
-}
-```
-
-## Steps
-
-### Step 1: 创建 src/ruby-modal.ts (stub for compilation)
-Use the stub code above.
-
-### Step 2: 创建 src/toolbar.ts
-```typescript
-import { EditorView, ViewPlugin, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Plugin, MarkdownView, Notice } from "obsidian";
-import { generatePoemTemplate, generateFrontmatter } from "./templates";
-import { RubyModal, buildRubyHtml } from "./ruby-modal";
-
-class HetiToolbarWidget extends WidgetType {
-  private plugin: Plugin;
-  constructor(plugin: Plugin) { super(); this.plugin = plugin; }
-
-  toDOM() {
-    const toolbar = document.createElement("div");
-    toolbar.className = "heti-toolbar";
-    const buttons = [
-      { label: "📜 插入模板", action: () => this.insertTemplate() },
-      { label: "↵ 换行", action: () => this.insertLineBreak() },
-      { label: "🔤 注音", action: () => this.openRubyModal() },
-      { label: "⇅ 横竖排", action: () => this.toggleVertical() },
-    ];
-    buttons.forEach((btn) => {
-      const el = document.createElement("button");
-      el.className = "heti-toolbar-btn";
-      el.textContent = btn.label;
-      el.addEventListener("click", btn.action);
-      toolbar.appendChild(el);
-    });
-    return toolbar;
+  private getPinyin(): string {
+    if (!this.final) return "";
+    const base = this.initial + this.final;
+    return applyTone(base, this.tone);
   }
 
-  eq() { return true; }
-
-  private insertTemplate() {
-    const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!view) return;
-    const editor = view.editor;
-    const template = generatePoemTemplate();
-    const content = editor.getValue();
-    if (!content.startsWith("---")) {
-      editor.setValue(generateFrontmatter() + template);
-    } else {
-      editor.replaceRange("\n\n" + template, editor.getCursor());
+  private updatePreview() {
+    const text = this.previewEl.querySelector(".heti-pinyin-text");
+    const pinyin = this.getPinyin();
+    if (text) {
+      text.textContent = pinyin || "点击选择声母、韵母、声调";
     }
   }
 
-  private insertLineBreak() {
-    const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!view) return;
-    const editor = view.editor;
-    const cursor = editor.getCursor();
-    const line = editor.getLine(cursor.line);
-    const lastChar = line.trim().slice(-1);
-    const punct = ["。", "？", "！"].includes(lastChar) ? "" : lastChar;
-    const hangPunct = punct ? `<span class="heti-hang">${punct}</span>` : "";
-    const newLine = line.replace(/[，。！？；]+$/, "") + hangPunct + "<br>\n";
-    editor.replaceRange(newLine, { line: cursor.line, ch: 0 }, { line: cursor.line, ch: line.length });
+  setPinyin(pinyin: string) {
+    this.initial = "";
+    this.final = pinyin;
+    this.tone = "";
+    this.updatePreview();
   }
-
-  private openRubyModal() {
-    const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!view) return;
-    const editor = view.editor;
-    const selection = editor.getSelection();
-    if (!selection) {
-      new Notice("请先选中需要注音的文字");
-      return;
-    }
-    new RubyModal(this.plugin.app, selection, (pinyin) => {
-      editor.replaceSelection(buildRubyHtml(selection, pinyin));
-    }).open();
-  }
-
-  private toggleVertical() {
-    const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!view || !view.file) return;
-    const cache = this.plugin.app.metadataCache.getFileCache(view.file);
-    const currentType = cache?.frontmatter?.heti;
-    const newType = currentType === "vertical" ? "poetry" : "vertical";
-    const content = view.editor.getValue();
-    view.editor.setValue(content.replace(/^heti:.*$/m, `heti: ${newType}`));
-  }
-}
-
-export function createHetiToolbar(plugin: Plugin) {
-  return ViewPlugin.fromClass(
-    class {
-      decorations: DecorationSet;
-      constructor(view: EditorView) { this.decorations = this.buildDecorations(view); }
-      update(update: ViewUpdate) {
-        if (update.docChanged || update.viewportChanged) {
-          this.decorations = this.buildDecorations(update.view);
-        }
-      }
-      buildDecorations(view: EditorView): DecorationSet {
-        const widget = new HetiToolbarWidget(plugin);
-        const deco = Decoration.widget({ widget, side: -1 });
-        return Decoration.set([[deco, 0, 0]]);
-      }
-    },
-    { decorations: (v) => v.decorations }
-  );
 }
 ```
 
-### Step 3: 修改 src/main.ts — 注册工具栏和命令
-```typescript
-import { Plugin, MarkdownView } from "obsidian";
-import { createHetiToolbar } from "./toolbar";
-import { TYPE_MAP } from "./main"; // Note: TYPE_MAP should be defined in main.ts
+- [ ] **Step 2: 运行类型检查**
 
-export default class HetiPlugin extends Plugin {
-  async onload() {
-    console.log("Heti 插件已加载");
+Run: `npx tsc --noEmit`
+Expected: 无错误
 
-    // 阅读模式 PostProcessor
-    this.registerMarkdownPostProcessor((el, ctx) => {
-      const cache = this.app.metadataCache.getFileCache(
-        this.app.vault.getAbstractFileByPath(ctx.sourcePath) as any
-      );
-      const hetiType = cache?.frontmatter?.heti;
-      if (!hetiType) return;
-      el.addClass("heti");
-      if (TYPE_MAP[hetiType]) el.addClass(TYPE_MAP[hetiType]);
-    });
+- [ ] **Step 3: 提交**
 
-    // 编辑器工具栏
-    this.registerEditorExtension(createHetiToolbar(this));
-
-    // 命令：新建诗词
-    this.addCommand({
-      id: "new-poem",
-      name: "新建诗词",
-      callback: () => this.createNewPoem(),
-    });
-  }
-
-  async createNewPoem() {
-    const leaf = this.app.workspace.getLeaf();
-    const file = await this.app.vault.create(
-      "诗词/新建诗词.md",
-      "---\nheti: poetry\n朝代: \n作者: \n---\n\n<div class=\"heti heti--poetry\">\n  <h2>标题<span class=\"heti-meta heti-small\">[朝代]<abbr title=\"\">作者</abbr></span></h2>\n  <p class=\"heti-x-large\">\n    \n  </p>\n</div>"
-    );
-    await leaf.openFile(file);
-  }
-
-  onunload() { console.log("Heti 插件已卸载"); }
-}
-```
-
-**Note:** The main.ts should also export TYPE_MAP as a module-level constant (from Task 2's fix).
-
-### Step 4: 验证构建
 ```bash
-npm run build
+git add src/pinyin-keyboard.ts
+git commit -m "feat: add pinyin keyboard component"
 ```
-
-### Step 5: Commit
-```bash
-git add -A
-git commit -m "feat: add editor toolbar with template, line break, vertical toggle"
-```
-
-## Verification
-- `src/toolbar.ts` 文件存在
-- `src/ruby-modal.ts` stub 文件存在（Task 5 会替换为完整实现）
-- `npm run build` 成功
-- main.ts 中注册了工具栏和命令

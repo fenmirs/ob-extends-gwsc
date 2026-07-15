@@ -1,78 +1,123 @@
-# Task 3: 模板生成器
+### Task 3: 模式切换按钮 Widget
 
-## Goal
-创建诗词 HTML 模板生成器，提供 `generatePoemTemplate` 和 `generateFrontmatter` 函数。
+**Files:**
+- Create: `src/mode-switcher.ts`
 
-## Files to Create
-- Create: `src/templates.ts`
+**Interfaces:**
+- Consumes: `viewModeField`, `setViewMode` from `src/view-mode.ts`
+- Produces: `createModeSwitcher()`
 
-## Steps
+- [ ] **Step 1: 创建模式切换 Widget**
 
-### Step 1: 创建 src/templates.ts
 ```typescript
-export interface PoemTemplateOptions {
-  title?: string;
-  dynasty?: string;
-  author?: string;
-  lines?: number;
-  hetiType?: "poetry" | "ancient" | "annotation" | "vertical";
-}
+// src/mode-switcher.ts
+import { EditorView, ViewPlugin, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
+import { Plugin } from "obsidian";
+import { viewModeField, setViewMode, ViewMode } from "./view-mode";
 
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function generateLines(count: number): string {
-  const lines: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const punct = i % 2 === 0 ? "，" : "。";
-    lines.push(`    第${i + 1}句<span class="heti-hang">${punct}</span>`);
+class ModeSwitcherWidget extends WidgetType {
+  private plugin: Plugin;
+  constructor(plugin: Plugin) {
+    super();
+    this.plugin = plugin;
   }
-  return lines.join("<br>\n");
+
+  toDOM(view: EditorView): HTMLElement {
+    const container = document.createElement("div");
+    container.className = "heti-mode-switcher";
+
+    const modes: { key: ViewMode; label: string }[] = [
+      { key: "form", label: "表单" },
+      { key: "source", label: "源码" },
+      { key: "preview", label: "阅读" },
+    ];
+
+    const currentMode = view.state.field(viewModeField);
+
+    modes.forEach(({ key, label }) => {
+      const btn = document.createElement("button");
+      btn.className = `heti-mode-btn${currentMode === key ? " active" : ""}`;
+      btn.textContent = label;
+      btn.addEventListener("click", () => {
+        view.dispatch({ effects: setViewMode.of(key) });
+      });
+      container.appendChild(btn);
+    });
+
+    return container;
+  }
+
+  eq(other: ModeSwitcherWidget): boolean {
+    return false;
+  }
 }
 
-export function generatePoemTemplate(options: PoemTemplateOptions = {}): string {
-  const {
-    title = "标题",
-    dynasty = "朝代",
-    author = "作者",
-    lines = 4,
-    hetiType = "poetry",
-  } = options;
+export function createModeSwitcher(plugin: Plugin) {
+  const emptyDeco = Decoration.set([]);
 
-  const containerClass = hetiType === "vertical"
-    ? "heti heti--vertical"
-    : `heti heti--${hetiType}`;
+  return ViewPlugin.fromClass(
+    class {
+      decorations: DecorationSet;
+      private widget = new ModeSwitcherWidget(plugin);
+      private deco = Decoration.widget({ widget: this.widget, side: -1 });
+      private cacheRef: import("obsidian").EventRef | null = null;
 
-  return `<div class="${containerClass}">
-  <h2>${escapeHtml(title)}<span class="heti-meta heti-small">[${escapeHtml(dynasty)}]<abbr title="">${escapeHtml(author)}</abbr></span></h2>
-  <p class="heti-x-large">
-${generateLines(lines)}
-  </p>
-</div>`;
+      constructor(view: EditorView) {
+        this.decorations = this.buildDecorations(view);
+        const recheck = () => {
+          this.decorations = this.buildDecorations(view);
+          view.dispatch({});
+        };
+        this.cacheRef = plugin.app.metadataCache.on("changed", recheck);
+      }
+
+      update(update: ViewUpdate) {
+        if (update.docChanged || update.viewportChanged || update.startState.field(viewModeField) !== update.state.field(viewModeField)) {
+          this.decorations = this.buildDecorations(update.view);
+        }
+      }
+
+      destroy() {
+        if (this.cacheRef) {
+          plugin.app.metadataCache.off(this.cacheRef);
+          this.cacheRef = null;
+        }
+      }
+
+      buildDecorations(view: EditorView): DecorationSet {
+        const file = getFileForView(plugin, view);
+        if (!file) return emptyDeco;
+        const cache = plugin.app.metadataCache.getFileCache(file);
+        if (!cache?.frontmatter?.heti) return emptyDeco;
+        return Decoration.set([{ from: 0, to: 0, value: this.deco }]);
+      }
+    },
+    { decorations: (v) => v.decorations }
+  );
 }
 
-export function generateFrontmatter(dynasty?: string, author?: string): string {
-  let fm = "---\nheti: poetry\n";
-  if (dynasty) fm += `朝代: ${dynasty}\n`;
-  if (author) fm += `作者: ${author}\n`;
-  fm += "---\n\n";
-  return fm;
+function getFileForView(plugin: Plugin, editorView: EditorView) {
+  const leaves = plugin.app.workspace.getLeavesOfType("markdown");
+  for (const leaf of leaves) {
+    const view = leaf.view;
+    if (view instanceof import("obsidian").MarkdownView && view.editor) {
+      const cm = (view.editor as any).cm || (view.editor as any).editor;
+      if (cm === editorView) return view.file;
+    }
+  }
+  const activeView = plugin.app.workspace.getActiveViewOfType(import("obsidian").MarkdownView);
+  return activeView?.file ?? null;
 }
 ```
 
-### Step 2: 验证构建
+- [ ] **Step 2: 运行类型检查**
+
+Run: `npx tsc --noEmit`
+Expected: 无错误
+
+- [ ] **Step 3: 提交**
+
 ```bash
-npm run build
+git add src/mode-switcher.ts
+git commit -m "feat: add mode switcher widget"
 ```
-
-### Step 3: Commit
-```bash
-git add -A
-git commit -m "feat: add poem HTML template generator"
-```
-
-## Verification
-- `src/templates.ts` 文件存在
-- `npm run build` 成功
-- 导出 `generatePoemTemplate` 和 `generateFrontmatter` 函数
