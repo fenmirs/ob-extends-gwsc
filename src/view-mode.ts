@@ -1,4 +1,5 @@
 import { StateField, StateEffect } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 
 export type ViewMode = "form" | "source" | "preview";
 
@@ -12,4 +13,9 @@ export const viewModeField = StateField.define<ViewMode>({
     }
     return value;
   },
+  provide: (f) =>
+    EditorView.editorAttributes.compute([f], (state) => {
+      const mode = state.field(f);
+      return { class: mode === "form" ? "heti-form-mode" : "" };
+    }),
 });

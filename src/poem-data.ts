@@ -53,7 +53,7 @@ function buildRubyHtml(chars: CharData[]): string {
   return chars
     .map((c) => {
       if (c.pinyin) {
-        return `${escapeHtml(c.char)}<rt>${escapeHtml(c.pinyin)}</rt>`;
+        return `<ruby>${escapeHtml(c.char)}<rt>${escapeHtml(c.pinyin)}</rt></ruby>`;
       }
       return escapeHtml(c.char);
     })
