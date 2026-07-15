@@ -2,7 +2,7 @@
 
 ## Obsidian Heti Plugin
 
-Task 1: pending
+Task 1: complete (commit 5c454f3, review clean)
 Task 2: pending
 Task 3: pending
 Task 4: pending
