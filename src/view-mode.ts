@@ -1,7 +1,7 @@
 import { StateField, StateEffect } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 
-export type ViewMode = "form" | "source" | "preview";
+export type ViewMode = "form" | "source";
 
 export const setViewMode = StateEffect.define<ViewMode>();
 

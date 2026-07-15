@@ -16,7 +16,6 @@ class ModeSwitcherWidget extends WidgetType {
     const modes: { key: ViewMode; label: string }[] = [
       { key: "form", label: "表单" },
       { key: "source", label: "源码" },
-      { key: "preview", label: "阅读" },
     ];
 
     const currentMode = view.state.field(viewModeField);
@@ -48,6 +47,7 @@ export function createModeSwitcher(plugin: Plugin) {
       private widget = new ModeSwitcherWidget(plugin);
       private deco = Decoration.widget({ widget: this.widget, side: -1 });
       private cacheRef: import("obsidian").EventRef | null = null;
+      private container: HTMLElement | null = null;
 
       constructor(view: EditorView) {
         this.decorations = this.buildDecorations(view);
@@ -61,6 +61,7 @@ export function createModeSwitcher(plugin: Plugin) {
       update(update: ViewUpdate) {
         if (update.docChanged || update.viewportChanged || update.startState.field(viewModeField) !== update.state.field(viewModeField)) {
           this.decorations = this.buildDecorations(update.view);
+          this.updateButtonStates(update.view);
         }
       }
 
@@ -77,6 +78,17 @@ export function createModeSwitcher(plugin: Plugin) {
         const cache = plugin.app.metadataCache.getFileCache(file);
         if (!cache?.frontmatter?.heti) return emptyDeco;
         return Decoration.set([{ from: 0, to: 0, value: this.deco }]);
+      }
+
+      private updateButtonStates(view: EditorView) {
+        const mode = view.state.field(viewModeField);
+        const switcher = document.querySelector(".heti-mode-switcher");
+        if (!switcher) return;
+        const btns = switcher.querySelectorAll(".heti-mode-btn");
+        const modes: ViewMode[] = ["form", "source"];
+        btns.forEach((btn, i) => {
+          btn.classList.toggle("active", modes[i] === mode);
+        });
       }
     },
     { decorations: (v) => v.decorations }
