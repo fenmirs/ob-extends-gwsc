@@ -38,8 +38,15 @@ export default class HetiPlugin extends Plugin {
 
   async createNewPoem() {
     const leaf = this.app.workspace.getLeaf();
+    const baseName = "诗词/新建诗词";
+    let filePath = `${baseName}.md`;
+    let counter = 1;
+    while (await this.app.vault.adapter.exists(filePath)) {
+      filePath = `${baseName} ${counter}.md`;
+      counter++;
+    }
     const file = await this.app.vault.create(
-      "诗词/新建诗词.md",
+      filePath,
       "---\nheti: poetry\n朝代: \n作者: \n---\n\n<div class=\"heti heti--poetry\">\n  <h2>标题<span class=\"heti-meta heti-small\">[朝代]<abbr title=\"\">作者</abbr></span></h2>\n  <p class=\"heti-x-large\">\n    \n  </p>\n</div>"
     );
     await leaf.openFile(file);
