@@ -3,8 +3,8 @@
 ## Obsidian Heti Plugin
 
 Task 1: complete (commit 5c454f3, review clean)
-Task 2: pending
-Task 3: pending
+Task 2: complete (commits a26b789..06f7cc9, review clean)
+Task 3: complete (commits e46238d..00cb502, review clean)
 Task 4: pending
 Task 5: pending
 Task 6: pending

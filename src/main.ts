@@ -1,4 +1,5 @@
-import { Plugin } from "obsidian";
+import { Plugin, MarkdownView } from "obsidian";
+import { createHetiToolbar } from "./toolbar";
 
 const TYPE_MAP: Record<string, string> = {
   poetry: "heti--poetry",
@@ -7,25 +8,42 @@ const TYPE_MAP: Record<string, string> = {
   vertical: "heti--vertical",
 };
 
+export { TYPE_MAP };
+
 export default class HetiPlugin extends Plugin {
   async onload() {
     console.log("Heti 插件已加载");
 
+    // 阅读模式 PostProcessor
     this.registerMarkdownPostProcessor((el, ctx) => {
       const cache = this.app.metadataCache.getFileCache(
         this.app.vault.getAbstractFileByPath(ctx.sourcePath) as any
       );
       const hetiType = cache?.frontmatter?.heti;
       if (!hetiType) return;
-
       el.addClass("heti");
-      if (TYPE_MAP[hetiType]) {
-        el.addClass(TYPE_MAP[hetiType]);
-      }
+      if (TYPE_MAP[hetiType]) el.addClass(TYPE_MAP[hetiType]);
+    });
+
+    // 编辑器工具栏
+    this.registerEditorExtension(createHetiToolbar(this));
+
+    // 命令：新建诗词
+    this.addCommand({
+      id: "new-poem",
+      name: "新建诗词",
+      callback: () => this.createNewPoem(),
     });
   }
 
-  onunload() {
-    console.log("Heti 插件已卸载");
+  async createNewPoem() {
+    const leaf = this.app.workspace.getLeaf();
+    const file = await this.app.vault.create(
+      "诗词/新建诗词.md",
+      "---\nheti: poetry\n朝代: \n作者: \n---\n\n<div class=\"heti heti--poetry\">\n  <h2>标题<span class=\"heti-meta heti-small\">[朝代]<abbr title=\"\">作者</abbr></span></h2>\n  <p class=\"heti-x-large\">\n    \n  </p>\n</div>"
+    );
+    await leaf.openFile(file);
   }
+
+  onunload() { console.log("Heti 插件已卸载"); }
 }
