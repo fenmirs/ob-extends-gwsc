@@ -8,5 +8,5 @@ Task 3: complete (commits e46238d..00cb502, review clean)
 Task 4: complete (commits 2e048a4..3ff881e, review clean)
 Task 5: complete (review clean)
 Task 6: complete (commit da92833, review clean)
-Task 7: pending
+Task 7: complete (review clean)
 Task 8: pending
