@@ -1,3 +1,16 @@
+# Task 5: 注音弹窗
+
+## Goal
+创建注音弹窗（RubyModal），替换 Task 4 中创建的 stub 文件，并添加样式。
+
+## Files to Create/Modify
+- Modify: `src/ruby-modal.ts` (替换 stub 为完整实现)
+- Modify: `src/styles.css` (添加样式)
+
+## Steps
+
+### Step 1: 替换 src/ruby-modal.ts 为完整实现
+```typescript
 import { App, Modal } from "obsidian";
 
 export class RubyModal extends Modal {
@@ -70,3 +83,27 @@ export function buildRubyHtml(characters: string, pinyin: string): string {
     return `<ruby>${chars.map((c) => `${c}<rt>${pinyin}</rt>`).join("")}</ruby>`;
   }
 }
+```
+
+### Step 2: 为 RubyModal 添加样式到 src/styles.css
+```css
+.heti-ruby-modal .modal-content { padding: 16px; }
+.heti-ruby-modal h3 { margin-top: 0; }
+```
+
+### Step 3: 验证构建
+```bash
+npm run build
+```
+
+### Step 4: Commit
+```bash
+git add -A
+git commit -m "feat: add ruby/furigana modal with pinyin input"
+```
+
+## Verification
+- `src/ruby-modal.ts` 包含完整的 RubyModal 和 buildRubyHtml 实现
+- `src/styles.css` 包含 RubyModal 样式
+- `npm run build` 成功
+- toolbar.ts 中的注音按钮可以正常调用 RubyModal

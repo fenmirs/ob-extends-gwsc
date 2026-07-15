@@ -28,3 +28,5 @@
   background: var(--interactive-accent);
   color: var(--text-on-accent);
 }
+.heti-ruby-modal .modal-content { padding: 16px; }
+.heti-ruby-modal h3 { margin-top: 0; }
