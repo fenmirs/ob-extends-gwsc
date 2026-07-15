@@ -1,0 +1,9 @@
+{
+  "id": "obsidian-heti",
+  "name": "Heti 中文排版增强",
+  "version": "0.1.0",
+  "minAppVersion": "0.15.0",
+  "description": "基于 Heti CSS 的中文诗词排版增强，提供编辑器工具栏、注音弹窗和阅读模式排版",
+  "author": "fenmi",
+  "isDesktopOnly": false
+}
