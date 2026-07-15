@@ -1,4 +1,11 @@
-import { Plugin, MarkdownView } from "obsidian";
+import { Plugin } from "obsidian";
+
+const TYPE_MAP: Record<string, string> = {
+  poetry: "heti--poetry",
+  ancient: "heti--ancient",
+  annotation: "heti--annotation",
+  vertical: "heti--vertical",
+};
 
 export default class HetiPlugin extends Plugin {
   async onload() {
@@ -12,14 +19,8 @@ export default class HetiPlugin extends Plugin {
       if (!hetiType) return;
 
       el.addClass("heti");
-      const typeMap: Record<string, string> = {
-        poetry: "heti--poetry",
-        ancient: "heti--ancient",
-        annotation: "heti--annotation",
-        vertical: "heti--vertical",
-      };
-      if (typeMap[hetiType]) {
-        el.addClass(typeMap[hetiType]);
+      if (TYPE_MAP[hetiType]) {
+        el.addClass(TYPE_MAP[hetiType]);
       }
     });
   }
