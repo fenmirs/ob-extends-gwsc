@@ -1,6 +1,6 @@
 import { EditorView, ViewPlugin, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
 import { Plugin, MarkdownView, Notice, TFile } from "obsidian";
-import { generatePoemTemplate, generateFrontmatter } from "./templates";
+import { createEmptyForm, generatePoemHtml } from "./poem-data";
 import { RubyModal, buildRubyHtml } from "./ruby-modal";
 
 class HetiToolbarWidget extends WidgetType {
@@ -32,12 +32,13 @@ class HetiToolbarWidget extends WidgetType {
     const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) return;
     const editor = view.editor;
-    const template = generatePoemTemplate();
+    const fullOutput = generatePoemHtml(createEmptyForm());
     const content = editor.getValue();
     if (!content.match(/^---\s*\n/)) {
-      editor.replaceRange(generateFrontmatter() + template, { line: 0, ch: 0 }, { line: 0, ch: 0 });
+      editor.replaceRange(fullOutput, { line: 0, ch: 0 }, { line: 0, ch: 0 });
     } else {
-      editor.replaceRange("\n\n" + template, editor.getCursor());
+      const htmlPart = fullOutput.replace(/^---\n[\s\S]*?---\n\n/, "");
+      editor.replaceRange("\n\n" + htmlPart, editor.getCursor());
     }
   }
 
@@ -88,29 +89,57 @@ class HetiToolbarWidget extends WidgetType {
   }
 }
 
-function isHetiFile(plugin: Plugin, view: EditorView): boolean {
+function findFileForView(plugin: Plugin, editorView: EditorView): TFile | null {
+  const leaves = plugin.app.workspace.getLeavesOfType("markdown");
+  for (const leaf of leaves) {
+    const view = leaf.view;
+    if (view instanceof MarkdownView && view.editor) {
+      const cm = (view.editor as any).cm || (view.editor as any).editor;
+      if (cm === editorView) return view.file;
+    }
+  }
   const activeView = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-  if (!activeView || !activeView.file) return false;
-  const cache = plugin.app.metadataCache.getFileCache(activeView.file);
+  return activeView?.file ?? null;
+}
+
+function isHetiFile(plugin: Plugin, editorView: EditorView): boolean {
+  const file = findFileForView(plugin, editorView);
+  if (!file) return false;
+  const cache = plugin.app.metadataCache.getFileCache(file);
   return !!cache?.frontmatter?.heti;
 }
 
 export function createHetiToolbar(plugin: Plugin) {
-  const cachedWidget = new HetiToolbarWidget(plugin);
-  const cachedDeco = Decoration.widget({ widget: cachedWidget, side: -1 });
   const emptyDeco = Decoration.set([]);
   return ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
-      constructor(view: EditorView) { this.decorations = this.buildDecorations(view); }
+      private widget = new HetiToolbarWidget(plugin);
+      private deco = Decoration.widget({ widget: this.widget, side: -1 });
+      private cacheRef: import("obsidian").EventRef | null = null;
+
+      constructor(view: EditorView) {
+        this.decorations = this.buildDecorations(view);
+        const recheck = () => {
+          this.decorations = this.buildDecorations(view);
+          view.dispatch({});
+        };
+        this.cacheRef = plugin.app.metadataCache.on("changed", recheck);
+      }
+
       update(update: ViewUpdate) {
         if (update.docChanged || update.viewportChanged) {
           this.decorations = this.buildDecorations(update.view);
         }
       }
+
+      destroy() {
+        if (this.cacheRef) { plugin.app.metadataCache.off(this.cacheRef); this.cacheRef = null; }
+      }
+
       buildDecorations(view: EditorView): DecorationSet {
         if (!isHetiFile(plugin, view)) return emptyDeco;
-        return Decoration.set([[cachedDeco, 0, 0]]);
+        return Decoration.set([{ from: 0, to: 0, value: this.deco }]);
       }
     },
     { decorations: (v) => v.decorations }
