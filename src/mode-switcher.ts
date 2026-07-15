@@ -47,7 +47,7 @@ export function createModeSwitcher(plugin: Plugin) {
       private widget = new ModeSwitcherWidget(plugin);
       private deco = Decoration.widget({ widget: this.widget, side: -1 });
       private cacheRef: import("obsidian").EventRef | null = null;
-      private container: HTMLElement | null = null;
+      private changedRef: import("obsidian").EventRef | null = null;
 
       constructor(view: EditorView) {
         this.decorations = this.buildDecorations(view);
@@ -55,7 +55,8 @@ export function createModeSwitcher(plugin: Plugin) {
           this.decorations = this.buildDecorations(view);
           view.dispatch({});
         };
-        this.cacheRef = plugin.app.metadataCache.on("changed", recheck);
+        this.cacheRef = plugin.app.metadataCache.on("resolved", recheck);
+        this.changedRef = plugin.app.metadataCache.on("changed", recheck);
       }
 
       update(update: ViewUpdate) {
@@ -69,6 +70,10 @@ export function createModeSwitcher(plugin: Plugin) {
         if (this.cacheRef) {
           plugin.app.metadataCache.offref(this.cacheRef);
           this.cacheRef = null;
+        }
+        if (this.changedRef) {
+          plugin.app.metadataCache.offref(this.changedRef);
+          this.changedRef = null;
         }
       }
 
