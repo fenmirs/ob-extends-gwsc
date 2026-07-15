@@ -263,8 +263,10 @@ export function createFormWidget(plugin: Plugin) {
 
       constructor(view: EditorView) {
         this.decorations = this.buildDecorations(view);
+        this.syncFormModeClass(view);
         const recheck = () => {
           this.decorations = this.buildDecorations(view);
+          this.syncFormModeClass(view);
           view.dispatch({});
         };
         this.cacheRef = plugin.app.metadataCache.on("resolved", recheck);
@@ -280,6 +282,7 @@ export function createFormWidget(plugin: Plugin) {
         ) {
           this.decorations = this.buildDecorations(update.view);
         }
+        this.syncFormModeClass(update.view);
       }
 
       destroy() {
@@ -303,6 +306,14 @@ export function createFormWidget(plugin: Plugin) {
         if (!cache?.frontmatter?.heti) return emptyDeco;
 
         return Decoration.set([{ from: 0, to: 0, value: this.deco }]);
+      }
+
+      private syncFormModeClass(view: EditorView) {
+        const isForm = this.decorations !== emptyDeco;
+        const editorEl = (view as any).dom?.closest?.(".cm-editor");
+        if (editorEl) {
+          editorEl.classList.toggle("heti-form-mode", isForm);
+        }
       }
 
       private getFileForView(view: EditorView): TFile | null {
