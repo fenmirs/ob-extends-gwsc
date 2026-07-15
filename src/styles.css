@@ -30,6 +30,26 @@
 }
 .heti-ruby-modal .modal-content { padding: 16px; }
 .heti-ruby-modal h3 { margin-top: 0; }
+.heti-ruby-preview {
+  font-size: 24px;
+  text-align: center;
+  padding: 16px;
+}
+.heti-ruby-input-container label {
+  display: block;
+  margin-bottom: 4px;
+}
+.heti-ruby-input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+}
+.heti-ruby-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+}
 
 .markdown-preview-section .heti { max-width: 100%; padding: 16px; }
 .markdown-preview-section .heti--vertical {

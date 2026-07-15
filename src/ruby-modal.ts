@@ -1,5 +1,9 @@
 import { App, Modal } from "obsidian";
 
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 export class RubyModal extends Modal {
   private selectedText: string;
   private onSubmit: (pinyin: string) => void;
@@ -15,31 +19,22 @@ export class RubyModal extends Modal {
     contentEl.addClass("heti-ruby-modal");
     contentEl.createEl("h3", { text: "注音" });
 
-    const display = contentEl.createEl("div", { cls: "heti-ruby-preview", text: this.selectedText });
-    display.style.fontSize = "24px";
-    display.style.textAlign = "center";
-    display.style.padding = "16px";
+    contentEl.createEl("div", { cls: "heti-ruby-preview", text: this.selectedText });
 
     const inputContainer = contentEl.createEl("div", { cls: "heti-ruby-input-container" });
     inputContainer.createEl("label", { text: "拼音（统一: zhū yú 或 逐字: 茱:zhū,萸:yú）：" });
-    const input = inputContainer.createEl("input", {
+    inputContainer.createEl("input", {
       type: "text", cls: "heti-ruby-input",
       placeholder: "例: zhū yú 或 茱:zhū,萸:yú",
     });
-    input.style.width = "100%";
-    input.style.marginTop = "8px";
-    input.style.padding = "8px";
 
     const buttonContainer = contentEl.createEl("div", { cls: "heti-ruby-buttons" });
-    buttonContainer.style.display = "flex";
-    buttonContainer.style.gap = "8px";
-    buttonContainer.style.marginTop = "12px";
-    buttonContainer.style.justifyContent = "flex-end";
 
     const cancelBtn = buttonContainer.createEl("button", { text: "取消" });
     cancelBtn.addEventListener("click", () => this.close());
 
     const confirmBtn = buttonContainer.createEl("button", { text: "确认", cls: "mod-cta" });
+    const input = contentEl.querySelector(".heti-ruby-input") as HTMLInputElement;
     confirmBtn.addEventListener("click", () => {
       const pinyin = input.value.trim();
       if (pinyin) { this.onSubmit(pinyin); this.close(); }
@@ -64,9 +59,9 @@ export function buildRubyHtml(characters: string, pinyin: string): string {
     });
     return `<ruby>${chars.map((c) => {
       const pin = pinyinMap.get(c) || "";
-      return pin ? `${c}<rt>${pin}</rt>` : c;
+      return pin ? `${c}<rt>${escapeHtml(pin)}</rt>` : c;
     }).join("")}</ruby>`;
   } else {
-    return `<ruby>${chars.map((c) => `${c}<rt>${pinyin}</rt>`).join("")}</ruby>`;
+    return `<ruby>${chars.map((c) => `${c}<rt>${escapeHtml(pinyin)}</rt>`).join("")}</ruby>`;
   }
 }

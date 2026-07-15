@@ -1,5 +1,5 @@
 import { EditorView, ViewPlugin, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Plugin, MarkdownView, Notice } from "obsidian";
+import { Plugin, MarkdownView, Notice, TFile } from "obsidian";
 import { generatePoemTemplate, generateFrontmatter } from "./templates";
 import { RubyModal, buildRubyHtml } from "./ruby-modal";
 
@@ -35,7 +35,7 @@ class HetiToolbarWidget extends WidgetType {
     const template = generatePoemTemplate();
     const content = editor.getValue();
     if (!content.match(/^---\s*\n/)) {
-      editor.setValue(generateFrontmatter() + template);
+      editor.replaceRange(generateFrontmatter() + template, { line: 0, ch: 0 }, { line: 0, ch: 0 });
     } else {
       editor.replaceRange("\n\n" + template, editor.getCursor());
     }
@@ -76,27 +76,40 @@ class HetiToolbarWidget extends WidgetType {
     const currentType = cache?.frontmatter?.heti;
     const newType = currentType === "vertical" ? "poetry" : "vertical";
     const content = view.editor.getValue();
-    if (/^heti:.*$/m.test(content)) {
-      view.editor.setValue(content.replace(/^heti:.*$/m, `heti: ${newType}`));
+    const match = content.match(/^heti:.*$/m);
+    if (match && match.index !== undefined) {
+      const startPos = view.editor.posToOffset({ line: 0, ch: 0 });
+      const matchLine = content.substring(0, match.index).split("\n").length - 1;
+      const matchCh = match[0].length;
+      view.editor.replaceRange(`heti: ${newType}`, { line: matchLine, ch: 0 }, { line: matchLine, ch: matchCh });
     } else {
       new Notice("文档中未找到 heti 字段，请手动添加 frontmatter");
     }
   }
 }
 
+function isHetiFile(plugin: Plugin, view: EditorView): boolean {
+  const activeView = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+  if (!activeView || !activeView.file) return false;
+  const cache = plugin.app.metadataCache.getFileCache(activeView.file);
+  return !!cache?.frontmatter?.heti;
+}
+
 export function createHetiToolbar(plugin: Plugin) {
   const cachedWidget = new HetiToolbarWidget(plugin);
   const cachedDeco = Decoration.widget({ widget: cachedWidget, side: -1 });
+  const emptyDeco = Decoration.set([]);
   return ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
-      constructor(view: EditorView) { this.decorations = this.buildDecorations(); }
+      constructor(view: EditorView) { this.decorations = this.buildDecorations(view); }
       update(update: ViewUpdate) {
         if (update.docChanged || update.viewportChanged) {
-          this.decorations = this.buildDecorations();
+          this.decorations = this.buildDecorations(update.view);
         }
       }
-      buildDecorations(): DecorationSet {
+      buildDecorations(view: EditorView): DecorationSet {
+        if (!isHetiFile(plugin, view)) return emptyDeco;
         return Decoration.set([[cachedDeco, 0, 0]]);
       }
     },
