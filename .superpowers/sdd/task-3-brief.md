@@ -1,123 +1,93 @@
-### Task 3: 模式切换按钮 Widget
+### Task 3: 更新表单 UI
 
 **Files:**
-- Create: `src/mode-switcher.ts`
+- Modify: `src/form-widget.ts:101-179`
 
 **Interfaces:**
-- Consumes: `viewModeField`, `setViewMode` from `src/view-mode.ts`
-- Produces: `createModeSwitcher()`
+- Consumes: `getDefaultFont()`, `getAvailableChineseFonts()` from `src/font-detector.ts`
+- Produces: 字体/字号下拉框 UI
 
-- [ ] **Step 1: 创建模式切换 Widget**
+- [ ] **Step 1: 在 form-widget.ts 顶部添加导入**
 
 ```typescript
-// src/mode-switcher.ts
-import { EditorView, ViewPlugin, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Plugin } from "obsidian";
-import { viewModeField, setViewMode, ViewMode } from "./view-mode";
-
-class ModeSwitcherWidget extends WidgetType {
-  private plugin: Plugin;
-  constructor(plugin: Plugin) {
-    super();
-    this.plugin = plugin;
-  }
-
-  toDOM(view: EditorView): HTMLElement {
-    const container = document.createElement("div");
-    container.className = "heti-mode-switcher";
-
-    const modes: { key: ViewMode; label: string }[] = [
-      { key: "form", label: "表单" },
-      { key: "source", label: "源码" },
-      { key: "preview", label: "阅读" },
-    ];
-
-    const currentMode = view.state.field(viewModeField);
-
-    modes.forEach(({ key, label }) => {
-      const btn = document.createElement("button");
-      btn.className = `heti-mode-btn${currentMode === key ? " active" : ""}`;
-      btn.textContent = label;
-      btn.addEventListener("click", () => {
-        view.dispatch({ effects: setViewMode.of(key) });
-      });
-      container.appendChild(btn);
-    });
-
-    return container;
-  }
-
-  eq(other: ModeSwitcherWidget): boolean {
-    return false;
-  }
-}
-
-export function createModeSwitcher(plugin: Plugin) {
-  const emptyDeco = Decoration.set([]);
-
-  return ViewPlugin.fromClass(
-    class {
-      decorations: DecorationSet;
-      private widget = new ModeSwitcherWidget(plugin);
-      private deco = Decoration.widget({ widget: this.widget, side: -1 });
-      private cacheRef: import("obsidian").EventRef | null = null;
-
-      constructor(view: EditorView) {
-        this.decorations = this.buildDecorations(view);
-        const recheck = () => {
-          this.decorations = this.buildDecorations(view);
-          view.dispatch({});
-        };
-        this.cacheRef = plugin.app.metadataCache.on("changed", recheck);
-      }
-
-      update(update: ViewUpdate) {
-        if (update.docChanged || update.viewportChanged || update.startState.field(viewModeField) !== update.state.field(viewModeField)) {
-          this.decorations = this.buildDecorations(update.view);
-        }
-      }
-
-      destroy() {
-        if (this.cacheRef) {
-          plugin.app.metadataCache.off(this.cacheRef);
-          this.cacheRef = null;
-        }
-      }
-
-      buildDecorations(view: EditorView): DecorationSet {
-        const file = getFileForView(plugin, view);
-        if (!file) return emptyDeco;
-        const cache = plugin.app.metadataCache.getFileCache(file);
-        if (!cache?.frontmatter?.heti) return emptyDeco;
-        return Decoration.set([{ from: 0, to: 0, value: this.deco }]);
-      }
-    },
-    { decorations: (v) => v.decorations }
-  );
-}
-
-function getFileForView(plugin: Plugin, editorView: EditorView) {
-  const leaves = plugin.app.workspace.getLeavesOfType("markdown");
-  for (const leaf of leaves) {
-    const view = leaf.view;
-    if (view instanceof import("obsidian").MarkdownView && view.editor) {
-      const cm = (view.editor as any).cm || (view.editor as any).editor;
-      if (cm === editorView) return view.file;
-    }
-  }
-  const activeView = plugin.app.workspace.getActiveViewOfType(import("obsidian").MarkdownView);
-  return activeView?.file ?? null;
-}
+import { getDefaultFont, getAvailableChineseFonts } from "./font-detector";
 ```
 
-- [ ] **Step 2: 运行类型检查**
+- [ ] **Step 2: 在 renderForm() 中添加字体下拉框**
+
+在 `typeSelect.addEventListener("change", ...)` 之后添加：
+
+```typescript
+    const fontRow = container.createEl("div", { cls: "heti-form-row" });
+    fontRow.createEl("label", { cls: "heti-form-label", text: "字体" });
+    const fontSelect = fontRow.createEl("select", {
+      cls: "heti-form-select",
+    });
+    
+    // 默认字体选项
+    const defaultOpt = fontSelect.createEl("option", { value: "", text: "默认" });
+    if (!this.formData.font) defaultOpt.selected = true;
+    
+    // 动态检测的字体选项
+    const availableFonts = getAvailableChineseFonts();
+    availableFonts.forEach((fontName) => {
+      const opt = fontSelect.createEl("option", { value: fontName, text: fontName });
+      if (fontName === this.formData.font) opt.selected = true;
+    });
+    
+    fontSelect.addEventListener("change", () => {
+      this.formData.font = fontSelect.value;
+      this.syncToEditor();
+    });
+```
+
+- [ ] **Step 3: 在 renderForm() 中添加字号下拉框**
+
+在字体下拉框之后添加：
+
+```typescript
+    const fontSizeRow = container.createEl("div", { cls: "heti-form-row" });
+    fontSizeRow.createEl("label", { cls: "heti-form-label", text: "字号" });
+    const fontSizeSelect = fontSizeRow.createEl("select", {
+      cls: "heti-form-select",
+    });
+    
+    // 字号选项
+    const fontSizes = [
+      { value: 0, label: "默认" },
+      { value: 16, label: "16px" },
+      { value: 18, label: "18px" },
+      { value: 20, label: "20px" },
+      { value: 24, label: "24px" },
+      { value: 28, label: "28px" },
+      { value: 32, label: "32px" },
+      { value: 36, label: "36px" },
+    ];
+    
+    fontSizes.forEach(({ value, label }) => {
+      const opt = fontSizeSelect.createEl("option", { value: String(value), text: label });
+      if (value === this.formData.fontSize) opt.selected = true;
+    });
+    
+    fontSizeSelect.addEventListener("change", () => {
+      this.formData.fontSize = Number(fontSizeSelect.value);
+      this.syncToEditor();
+    });
+```
+
+- [ ] **Step 4: 验证 TypeScript 编译**
 
 Run: `npx tsc --noEmit`
-Expected: 无错误
+Expected: 无新增错误
 
-- [ ] **Step 3: 提交**
+- [ ] **Step 5: 构建**
+
+Run: `npm run build`
+Expected: 构建成功
+
+- [ ] **Step 6: 提交**
 
 ```bash
-git add src/mode-switcher.ts
-git commit -m "feat: add mode switcher widget"
+git add src/form-widget.ts
+git commit -m "feat: add font and font size selectors to form UI"
 ```

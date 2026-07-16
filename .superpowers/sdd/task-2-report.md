@@ -1,27 +1,22 @@
-# Task 2: 视图模式 StateField — Report
+## Task 2: 扩展数据结构和 HTML 生成
 
-## What I implemented
+**Status:** DONE
 
-Created `src/view-mode.ts` with:
-- `ViewMode` type union: `"form" | "source" | "preview"`
-- `setViewMode` StateEffect for dispatching mode changes
-- `viewModeField` StateField that defaults to `"form"` and applies effects on transactions
+### What I Implemented
+Extended `PoemFormData` interface with `font` (string) and `fontSize` (number) fields. Updated all related functions:
+- `createEmptyForm()` — defaults `font: ""`, `fontSize: 0`
+- `generatePoemHtml()` — outputs `字体`/`字号` in frontmatter and CSS custom properties (`--heti-font`, `--heti-font-size`) as inline style on the container div
+- `parseExistingPoem()` — reads `字体`/`字号` from frontmatter into the form data
 
-Exactly as specified in the task brief — no deviations.
+### Files Changed
+- `src/poem-data.ts` — interface + 3 functions updated (+16 lines)
 
-## Type check
+### Verification
+- `npx tsc --noEmit` — pre-existing obsidian type errors only, no new errors
+- `npm run build` — build succeeded cleanly
 
-`npx tsc --noEmit` — no errors from `view-mode.ts`. Pre-existing errors only:
-- `obsidian.d.ts` type mismatches (Obsidian version issue)
-- `src/toolbar.ts:137` missing argument (unrelated)
+### Commit
+- `c67d864` feat: extend PoemFormData with font and fontSize fields
 
-## Commit
-
-`7dab840` — `feat: add view mode state field`
-
-## Self-review
-
-- Code matches the brief exactly
-- No overengineering, no unnecessary additions
-- Follows CM6 idioms (StateEffect + StateField pattern)
-- Clean, minimal, 15 lines
+### Self-Review
+All 7 steps from the task brief implemented. Code follows existing patterns (YAML frontmatter keys in Chinese, CSS custom property convention). No over-engineering.

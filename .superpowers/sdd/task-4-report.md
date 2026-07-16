@@ -1,31 +1,21 @@
-# Task 4 Report: 拼音键盘组件
+# Task 4: 添加 CSS 变量和比例缩放
 
 **Status:** DONE
 
-## What I Implemented
+## What was implemented
+Appended CSS variable rules to `src/styles.css` and copied to root `styles.css`:
+- `.heti` uses `--heti-font` with inherit fallback
+- `.heti .heti-x-large` uses `--heti-font-size` with inherit fallback
+- `.heti h2` scales `--heti-font-size` by 1.5x
+- `.heti .heti-meta` scales `--heti-font-size` by 0.75x
 
-Created `src/pinyin-keyboard.ts` exactly per the task brief, containing:
-- `INITIALS` — 23 pinyin initials
-- `FINALS` — 35 pinyin finals
-- `TONES` / `TONE_LABELS` — 4 tone marks
-- `applyTone()` — applies a tone diacritic to a vowel string
-- `PinyinKeyboard` class — Obsidian-style DOM component with preview, initial/final/tone button rows, and clear/confirm actions
+## Files changed
+- `src/styles.css` — appended CSS rules
+- `styles.css` — copied from src
 
-## Testing
+## Test results
+- Build succeeded (`npm run build`)
 
-- `npx tsc --noEmit` — `pinyin-keyboard.ts` compiles with zero errors (4 pre-existing errors in Obsidian type defs and `toolbar.ts` are unrelated)
-
-## Files Changed
-
-- Created: `src/pinyin-keyboard.ts` (176 lines)
-
-## Commit
-
-- `4e21f8b` — feat: add pinyin keyboard component
-
-## Self-Review
-
-- Implementation matches the brief exactly
-- `CharData` import is present (consumed as interface dependency per spec)
-- `createEl` is used consistently with Obsidian's augmented HTMLElement (same pattern as existing code)
-- No overbuilding; no extra logic beyond the spec
+## Self-review
+- Follows exact spec from task brief
+- No over-engineering; CSS only

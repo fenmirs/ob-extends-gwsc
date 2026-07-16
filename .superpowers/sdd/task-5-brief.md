@@ -1,140 +1,28 @@
-### Task 5: 单字卡片组件
+### Task 5: 清理调试日志
 
 **Files:**
-- Create: `src/char-card.ts`
+- Modify: `src/form-widget.ts:290-317`
+- Modify: `src/mode-switcher.ts:75-81`
 
 **Interfaces:**
-- Consumes: `CharData` from `src/poem-data.ts`, `PinyinKeyboard` from `src/pinyin-keyboard.ts`
-- Produces: `CharCard`
+- 无新增接口
 
-- [ ] **Step 1: 创建单字卡片组件**
+- [ ] **Step 1: 移除 form-widget.ts 中的 console.log**
 
-```typescript
-// src/char-card.ts
-import { CharData } from "./poem-data";
-import { PinyinKeyboard } from "./pinyin-keyboard";
+删除 `buildDecorations()` 和 `syncFormModeClass()` 中的所有 `console.log` 语句。
 
-export class CharCard {
-  private container: HTMLElement;
-  private charEl: HTMLElement;
-  private pinyinEl: HTMLElement;
-  private deleteBtn: HTMLElement;
-  private keyboardContainer: HTMLElement;
-  private keyboard: PinyinKeyboard | null = null;
-  private data: CharData;
-  private onUpdate: (data: CharData) => void;
-  private onDelete: () => void;
-  private isActive = false;
+- [ ] **Step 2: 移除 mode-switcher.ts 中的 console.log**
 
-  constructor(
-    data: CharData,
-    onUpdate: (data: CharData) => void,
-    onDelete: () => void
-  ) {
-    this.data = data;
-    this.onUpdate = onUpdate;
-    this.onDelete = onDelete;
+删除 `buildDecorations()` 中的所有 `console.log` 语句。
 
-    this.container = document.createElement("div");
-    this.container.className = "heti-char-card";
+- [ ] **Step 3: 构建**
 
-    this.charEl = this.container.createEl("div", {
-      cls: "heti-char",
-      text: data.char,
-    });
+Run: `npm run build`
+Expected: 构建成功
 
-    this.pinyinEl = this.container.createEl("div", {
-      cls: "heti-char-pinyin",
-      text: data.pinyin || "",
-    });
-
-    this.deleteBtn = this.container.createEl("div", {
-      cls: "heti-char-delete",
-      text: "×",
-    });
-    this.deleteBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      this.onDelete();
-    });
-
-    this.keyboardContainer = document.createElement("div");
-    this.keyboardContainer.className = "heti-char-keyboard-container";
-
-    this.container.addEventListener("click", () => this.toggleKeyboard());
-
-    this.container.addEventListener("mouseenter", () => {
-      this.container.classList.add("hovered");
-    });
-    this.container.addEventListener("mouseleave", () => {
-      this.container.classList.remove("hovered");
-    });
-  }
-
-  getElement(): HTMLElement {
-    return this.container;
-  }
-
-  getKeyboardElement(): HTMLElement {
-    return this.keyboardContainer;
-  }
-
-  getData(): CharData {
-    return this.data;
-  }
-
-  private toggleKeyboard() {
-    if (this.isActive) {
-      this.closeKeyboard();
-    } else {
-      this.openKeyboard();
-    }
-  }
-
-  openKeyboard() {
-    this.isActive = true;
-    this.container.classList.add("active");
-
-    this.keyboard = new PinyinKeyboard(
-      (pinyin) => {
-        this.data.pinyin = pinyin;
-        this.pinyinEl.textContent = pinyin;
-        this.onUpdate(this.data);
-        this.closeKeyboard();
-      },
-      () => {
-        this.data.pinyin = undefined;
-        this.pinyinEl.textContent = "";
-        this.onUpdate(this.data);
-      }
-    );
-
-    if (this.data.pinyin) {
-      this.keyboard.setPinyin(this.data.pinyin);
-    }
-
-    this.keyboardContainer.empty();
-    this.keyboardContainer.appendChild(this.keyboard.getElement());
-    this.keyboardContainer.style.display = "block";
-  }
-
-  closeKeyboard() {
-    this.isActive = false;
-    this.container.classList.remove("active");
-    this.keyboardContainer.style.display = "none";
-    this.keyboardContainer.empty();
-    this.keyboard = null;
-  }
-}
-```
-
-- [ ] **Step 2: 运行类型检查**
-
-Run: `npx tsc --noEmit`
-Expected: 无错误
-
-- [ ] **Step 3: 提交**
+- [ ] **Step 4: 提交**
 
 ```bash
-git add src/char-card.ts
-git commit -m "feat: add character card component"
+git add src/form-widget.ts src/mode-switcher.ts
+git commit -m "chore: remove debug logging"
 ```
