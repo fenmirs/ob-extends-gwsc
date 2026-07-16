@@ -17,6 +17,7 @@ class PoemFormWidget extends WidgetType {
   private formData: PoemFormData = createEmptyForm();
   private charCards: CharCard[][] = [[]];
   private formContainer: HTMLElement | null = null;
+  private loaded = false;
 
   constructor(plugin: Plugin) {
     super();
@@ -28,7 +29,10 @@ class PoemFormWidget extends WidgetType {
     container.className = "heti-poem-form";
     this.formContainer = container;
 
-    this.loadExistingContent(view);
+    if (!this.loaded) {
+      this.loadExistingContent(view);
+      this.loaded = true;
+    }
     this.renderForm(container, view);
     return container;
   }
