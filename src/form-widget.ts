@@ -11,7 +11,6 @@ import {
 } from "./poem-data";
 import { CharCard } from "./char-card";
 import { PinyinKeyboard } from "./pinyin-keyboard";
-import { viewModeField } from "./view-mode";
 import { getAvailableChineseFonts } from "./font-detector";
 
 class PoemFormWidget extends WidgetType {
@@ -98,10 +97,20 @@ class PoemFormWidget extends WidgetType {
             this.syncToEditor();
           },
           () => {
+            const activeEl = document.activeElement as HTMLInputElement;
+            const focusLine = activeEl?.closest?.(".heti-form-line");
+            const focusIndex = focusLine
+              ? Array.from(focusLine.parentElement!.children).indexOf(focusLine)
+              : -1;
             line.chars.splice(charIndex, 1);
             this.rebuildCharCards();
             this.renderForm(this.formContainer!, this.getEditorView()!);
             this.syncToEditor();
+            if (focusIndex >= 0) {
+              const lines = this.formContainer!.querySelectorAll(".heti-form-line");
+              const input = lines[focusIndex]?.querySelector("input");
+              if (input) requestAnimationFrame(() => (input as HTMLInputElement).focus());
+            }
           }
         );
         card.setOnCardClick(() => this.openSharedKeyboard(card, lineIndex, charIndex));
@@ -239,6 +248,33 @@ class PoemFormWidget extends WidgetType {
       this.syncToEditor();
     });
 
+    const charGapRow = container.createEl("div", { cls: "heti-form-row" });
+    charGapRow.createEl("label", { cls: "heti-form-label", text: "字距" });
+    const charGapSelect = charGapRow.createEl("select", {
+      cls: "heti-form-select",
+    });
+    
+    const charGaps = [
+      { value: 0, label: "默认" },
+      { value: 0.1, label: "0.1em" },
+      { value: 0.15, label: "0.15em" },
+      { value: 0.2, label: "0.2em" },
+      { value: 0.25, label: "0.25em" },
+      { value: 0.3, label: "0.3em" },
+      { value: 0.4, label: "0.4em" },
+      { value: 0.5, label: "0.5em" },
+    ];
+    
+    charGaps.forEach(({ value, label }) => {
+      const opt = charGapSelect.createEl("option", { value: String(value), text: label });
+      if (value === this.formData.charGap) opt.selected = true;
+    });
+    
+    charGapSelect.addEventListener("change", () => {
+      this.formData.charGap = Number(charGapSelect.value);
+      this.syncToEditor();
+    });
+
     const dynastyRow = container.createEl("div", { cls: "heti-form-row" });
     dynastyRow.createEl("label", { cls: "heti-form-label", text: "朝代" });
     const dynastyInput = dynastyRow.createEl("input", {
@@ -305,20 +341,19 @@ class PoemFormWidget extends WidgetType {
     });
     inputEl.value = charsToText(line.chars);
 
-    inputEl.addEventListener("blur", () => {
+    inputEl.addEventListener("input", () => {
       const newText = inputEl.value;
-      const newLine = textToLine(newText);
-      this.formData.lines[lineIndex] = newLine;
+      const oldChars = this.formData.lines[lineIndex].chars;
+      const newChars = textToLine(newText).chars;
+      this.formData.lines[lineIndex] = {
+        chars: newChars.map((nc, i) => ({
+          char: nc.char,
+          pinyin: oldChars[i]?.char === nc.char ? oldChars[i].pinyin : undefined,
+        })),
+      };
       this.rebuildCharCards();
       this.renderForm(this.formContainer!, view);
-      requestAnimationFrame(() => this.syncToEditor());
-    });
-
-    inputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        inputEl.blur();
-      }
+      this.syncToEditor();
     });
 
     const charContainer = lineEl.createEl("div", {
@@ -391,12 +426,7 @@ export function createFormWidget(plugin: Plugin) {
       }
 
       update(update: ViewUpdate) {
-        if (
-          update.docChanged ||
-          update.viewportChanged ||
-          update.startState.field(viewModeField) !==
-            update.state.field(viewModeField)
-        ) {
+        if (update.docChanged || update.viewportChanged) {
           this.decorations = this.buildDecorations(update.view);
         }
         this.syncFormModeClass(update.view);
@@ -414,9 +444,6 @@ export function createFormWidget(plugin: Plugin) {
       }
 
       buildDecorations(view: EditorView): DecorationSet {
-        const mode = view.state.field(viewModeField);
-        if (mode !== "form") return emptyDeco;
-
         const file = this.getFileForView(view);
         if (!file) return emptyDeco;
         const cache = plugin.app.metadataCache.getFileCache(file);

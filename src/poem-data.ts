@@ -14,6 +14,7 @@ export interface PoemFormData {
   author: string;
   font: string;
   fontSize: number;
+  charGap: number;
   lines: PoemLine[];
 }
 
@@ -25,6 +26,7 @@ export function createEmptyForm(): PoemFormData {
     author: "",
     font: "",
     fontSize: 0,
+    charGap: 0,
     lines: [{ chars: [] }],
   };
 }
@@ -84,6 +86,7 @@ export function generatePoemHtml(data: PoemFormData): string {
   if (data.author) frontmatter += `作者: "${escapeYamlValue(data.author)}"\n`;
   if (data.font) frontmatter += `字体: "${escapeYamlValue(data.font)}"\n`;
   if (data.fontSize > 0) frontmatter += `字号: ${data.fontSize}\n`;
+  if (data.charGap > 0) frontmatter += `字距: ${data.charGap}\n`;
   frontmatter += "---\n\n";
 
   const titleSpan = data.dynasty || data.author
@@ -93,6 +96,7 @@ export function generatePoemHtml(data: PoemFormData): string {
   const styleParts: string[] = [];
   if (data.font) styleParts.push(`--heti-font: ${data.font}`);
   if (data.fontSize > 0) styleParts.push(`--heti-font-size: ${data.fontSize}px`);
+  if (data.charGap > 0) styleParts.push(`--heti-char-gap: ${data.charGap}em`);
   const styleAttr = styleParts.length > 0 ? ` style="${styleParts.join("; ")}"` : "";
 
   return `${frontmatter}<div class="${containerClass}"${styleAttr}>
@@ -112,6 +116,7 @@ export function parseExistingPoem(
   const author = frontmatter?.作者 || "";
   const font = frontmatter?.字体 || "";
   const fontSize = typeof frontmatter?.字号 === "number" ? frontmatter.字号 : 0;
+  const charGap = typeof frontmatter?.字距 === "number" ? frontmatter.字距 : 0;
 
   const titleMatch = content.match(/<h2>(.*?)<span/);
   const title = titleMatch
@@ -153,6 +158,7 @@ export function parseExistingPoem(
     author,
     font,
     fontSize,
+    charGap,
     lines: lines.length > 0 ? lines : [{ chars: [] }],
   };
 }

@@ -1,7 +1,5 @@
 import { Plugin } from "obsidian";
-import { createModeSwitcher } from "./mode-switcher";
 import { createFormWidget } from "./form-widget";
-import { viewModeField, setViewMode } from "./view-mode";
 
 const TYPE_MAP: Record<string, string> = {
   poetry: "heti--poetry",
@@ -31,8 +29,6 @@ export default class HetiPlugin extends Plugin {
       }
     });
 
-    this.registerEditorExtension(viewModeField);
-    this.registerEditorExtension(createModeSwitcher(this));
     this.registerEditorExtension(createFormWidget(this));
 
     this.addCommand({

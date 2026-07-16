@@ -62,39 +62,36 @@
 .markdown-preview-section .heti rt { font-size: 0.5em; }
 
 /* 表单模式下隐藏编辑器文字和行号，保留 Widget */
-.heti-form-mode .cm-content,
-.heti-form-mode .cm-gutters {
-  visibility: hidden;
+.heti-form-mode .cm-content > .cm-line:not(.cm-active),
+.heti-form-mode .cm-content > .cm-html-embed,
+.heti-form-mode .cm-content > .cm-fold-indicator {
+  display: none;
 }
-.heti-form-mode .heti-poem-form,
-.heti-form-mode .heti-mode-switcher {
+.heti-form-mode .cm-content .cm-hmd-frontmatter {
+  display: none;
+}
+.heti-form-mode .cm-content {
+  padding-bottom: 0 !important;
+  caret-color: transparent !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: none !important;
+}
+.heti-form-mode .cm-content .cm-cursor,
+.heti-form-mode .cm-content .cm-widgetBuffer {
+  display: none;
+}
+.heti-form-mode .heti-poem-form {
+  pointer-events: auto !important;
+  caret-color: auto !important;
+  user-select: auto !important;
+}
+.heti-form-mode .cm-gutters,
+.heti-form-mode .cm-gutters-before {
+  display: none;
+}
+.heti-form-mode .heti-poem-form {
   visibility: visible;
-}
-
-/* 模式切换栏 */
-.heti-mode-switcher {
-  display: flex;
-  gap: 4px;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--background-modifier-border);
-}
-.heti-mode-btn {
-  padding: 4px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  transition: background 0.15s, color 0.15s;
-}
-.heti-mode-btn:hover {
-  background: var(--background-modifier-hover);
-  color: var(--text-normal);
-}
-.heti-mode-btn.active {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
 }
 
 /* 表单区域 */
