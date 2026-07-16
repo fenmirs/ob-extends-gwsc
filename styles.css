@@ -249,31 +249,6 @@
   background: var(--background-secondary);
   margin-top: 4px;
 }
-.heti-pinyin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--background-modifier-border);
-  margin-bottom: 8px;
-}
-.heti-pinyin-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-.heti-pinyin-close {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 16px;
-  padding: 0 4px;
-  line-height: 1;
-}
-.heti-pinyin-close:hover {
-  color: var(--text-normal);
-}
 .heti-pinyin-preview {
   padding: 8px;
   text-align: center;
@@ -328,6 +303,14 @@
 .heti-pinyin-confirm:hover {
   opacity: 0.9;
 }
+.heti-pinyin-close {
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+}
+.heti-pinyin-close:hover {
+  background: var(--background-modifier-border);
+  color: var(--text-normal);
+}
 
 /* 诗词字体和字号配置 */
 .heti {
@@ -341,4 +324,15 @@
 }
 .heti .heti-meta {
   font-size: calc(var(--heti-font-size, 24px) * 0.75);
+}
+
+/* 字符标签 */
+.heti {
+  --heti-char-gap: 0.25em;
+}
+.heti-char {
+  margin-right: var(--heti-char-gap);
+}
+.heti-char ruby {
+  ruby-align: center;
 }

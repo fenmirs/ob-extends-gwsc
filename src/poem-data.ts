@@ -57,9 +57,9 @@ function buildRubyHtml(chars: CharData[]): string {
   return chars
     .map((c) => {
       if (c.pinyin) {
-        return `<ruby>${escapeHtml(c.char)}<rt>${escapeHtml(c.pinyin)}</rt></ruby>`;
+        return `<span class="heti-char"><ruby>${escapeHtml(c.char)}<rt>${escapeHtml(c.pinyin)}</rt></ruby></span>`;
       }
-      return escapeHtml(c.char);
+      return `<span class="heti-char">${escapeHtml(c.char)}</span>`;
     })
     .join("");
 }
@@ -131,17 +131,15 @@ export function parseExistingPoem(
         .trim();
       if (!clean) return null;
       const chars: CharData[] = [];
-      const rubyRegex = /<ruby>(.*?)<rt>(.*?)<\/rt><\/ruby>|./g;
+      const regex = /<span class="heti-char">(?:<ruby>(.*?)<rt>(.*?)<\/rt><\/ruby>|(.*?))<\/span>|([^<])/g;
       let match: RegExpExecArray | null;
-      while ((match = rubyRegex.exec(clean)) !== null) {
+      while ((match = regex.exec(clean)) !== null) {
         if (match[1] && match[2]) {
-          const text = match[1].replace(/<[^>]+>/g, "");
-          const pinyin = match[2];
-          text.split("").forEach((ch) =>
-            chars.push({ char: ch, pinyin })
-          );
-        } else if (match[0]) {
-          chars.push({ char: match[0] });
+          chars.push({ char: match[1], pinyin: match[2] });
+        } else if (match[3] !== undefined) {
+          chars.push({ char: match[3] });
+        } else if (match[4]) {
+          chars.push({ char: match[4] });
         }
       }
       return chars.length > 0 ? { chars } : null;

@@ -67,16 +67,6 @@ export class PinyinKeyboard {
   }
 
   private build() {
-    const header = this.container.createEl("div", {
-      cls: "heti-pinyin-header",
-    });
-    header.createEl("span", { cls: "heti-pinyin-title", text: "拼音标注" });
-    const closeBtn = header.createEl("button", {
-      cls: "heti-pinyin-close",
-      text: "×",
-    });
-    closeBtn.addEventListener("click", () => this.onClose());
-
     const preview = this.container.createEl("div", {
       cls: "heti-pinyin-preview",
     });
@@ -164,6 +154,12 @@ export class PinyinKeyboard {
       const pinyin = this.getPinyin();
       if (pinyin) this.onConfirm(pinyin);
     });
+
+    const closeBtn = actions.createEl("button", {
+      cls: "heti-pinyin-btn heti-pinyin-close",
+      text: "关闭",
+    });
+    closeBtn.addEventListener("click", () => this.onClose());
   }
 
   private getPinyin(): string {
