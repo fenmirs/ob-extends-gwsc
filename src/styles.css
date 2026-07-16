@@ -100,8 +100,6 @@
 /* 表单区域 */
 .heti-poem-form {
   padding: 16px;
-  max-height: 60vh;
-  overflow-y: auto;
 }
 .heti-form-row {
   display: flex;
@@ -234,10 +232,13 @@
   color: var(--text-on-accent);
 }
 
-/* 拼音键盘容器 */
-.heti-char-keyboard-container {
-  display: none;
-  width: 100%;
+/* 共享拼音键盘容器 */
+.heti-shared-keyboard {
+  margin-top: 8px;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  background: var(--background-primary);
 }
 
 /* 拼音键盘 */
@@ -247,6 +248,31 @@
   border-radius: 4px;
   background: var(--background-secondary);
   margin-top: 4px;
+}
+.heti-pinyin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: 8px;
+}
+.heti-pinyin-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.heti-pinyin-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  line-height: 1;
+}
+.heti-pinyin-close:hover {
+  color: var(--text-normal);
 }
 .heti-pinyin-preview {
   padding: 8px;

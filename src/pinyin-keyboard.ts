@@ -46,13 +46,16 @@ export class PinyinKeyboard {
   private tone = "";
   private onConfirm: (pinyin: string) => void;
   private onClear: () => void;
+  private onClose: () => void;
 
   constructor(
     onConfirm: (pinyin: string) => void,
-    onClear: () => void
+    onClear: () => void,
+    onClose: () => void
   ) {
     this.onConfirm = onConfirm;
     this.onClear = onClear;
+    this.onClose = onClose;
     this.container = document.createElement("div");
     this.container.className = "heti-pinyin-keyboard";
     this.build();
@@ -64,6 +67,16 @@ export class PinyinKeyboard {
   }
 
   private build() {
+    const header = this.container.createEl("div", {
+      cls: "heti-pinyin-header",
+    });
+    header.createEl("span", { cls: "heti-pinyin-title", text: "拼音标注" });
+    const closeBtn = header.createEl("button", {
+      cls: "heti-pinyin-close",
+      text: "×",
+    });
+    closeBtn.addEventListener("click", () => this.onClose());
+
     const preview = this.container.createEl("div", {
       cls: "heti-pinyin-preview",
     });
@@ -163,7 +176,13 @@ export class PinyinKeyboard {
     const text = this.previewEl.querySelector(".heti-pinyin-text");
     const pinyin = this.getPinyin();
     if (text) {
-      text.textContent = pinyin || "点击选择声母、韵母、声调";
+      if (pinyin) {
+        text.textContent = pinyin;
+      } else if (this.initial || this.final) {
+        text.textContent = this.initial + this.final;
+      } else {
+        text.textContent = "点击选择声母、韵母、声调";
+      }
     }
   }
 

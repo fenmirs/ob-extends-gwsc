@@ -10,14 +10,18 @@ import {
   PoemLine,
 } from "./poem-data";
 import { CharCard } from "./char-card";
-import { viewModeField, setViewMode } from "./view-mode";
-import { getDefaultFont, getAvailableChineseFonts } from "./font-detector";
+import { PinyinKeyboard } from "./pinyin-keyboard";
+import { viewModeField } from "./view-mode";
+import { getAvailableChineseFonts } from "./font-detector";
 
 class PoemFormWidget extends WidgetType {
   private plugin: Plugin;
   private formData: PoemFormData = createEmptyForm();
   private charCards: CharCard[][] = [[]];
   private formContainer: HTMLElement | null = null;
+  private sharedKeyboardContainer: HTMLElement | null = null;
+  private sharedKeyboard: PinyinKeyboard | null = null;
+  private activeCard: CharCard | null = null;
   private loaded = false;
 
   constructor(plugin: Plugin) {
@@ -84,8 +88,9 @@ class PoemFormWidget extends WidgetType {
   }
 
   private rebuildCharCards() {
-    this.charCards = this.formData.lines.map((line) =>
-      line.chars.map((char, charIndex) => {
+    this.charCards = this.formData.lines.map((line, lineIndex) => {
+      const cards: CharCard[] = [];
+      line.chars.forEach((char, charIndex) => {
         const card = new CharCard(
           char,
           (updated) => {
@@ -94,17 +99,67 @@ class PoemFormWidget extends WidgetType {
           },
           () => {
             line.chars.splice(charIndex, 1);
-            this.rebuildForm();
+            this.rebuildCharCards();
+            this.renderForm(this.formContainer!, this.getEditorView()!);
             this.syncToEditor();
           }
         );
-        return card;
-      })
+        card.setOnCardClick(() => this.openSharedKeyboard(card, lineIndex, charIndex));
+        cards.push(card);
+      });
+      return cards;
+    });
+  }
+
+  openSharedKeyboard(card: CharCard, lineIndex: number, charIndex: number) {
+    if (this.activeCard === card) {
+      this.closeSharedKeyboard();
+      return;
+    }
+
+    this.closeSharedKeyboard();
+    this.activeCard = card;
+    card.setActive(true);
+
+    this.sharedKeyboard = new PinyinKeyboard(
+      (pinyin) => {
+        card.updatePinyin(pinyin);
+        this.formData.lines[lineIndex].chars[charIndex].pinyin = pinyin;
+        this.syncToEditor();
+        this.closeSharedKeyboard();
+      },
+      () => {
+        card.clearPinyin();
+        this.formData.lines[lineIndex].chars[charIndex].pinyin = undefined;
+        this.syncToEditor();
+      },
+      () => this.closeSharedKeyboard()
     );
+
+    if (card.getData().pinyin) {
+      this.sharedKeyboard.setPinyin(card.getData().pinyin!);
+    }
+
+    this.sharedKeyboardContainer!.empty();
+    this.sharedKeyboardContainer!.appendChild(this.sharedKeyboard.getElement());
+    this.sharedKeyboardContainer!.style.display = "block";
+  }
+
+  private closeSharedKeyboard() {
+    if (this.activeCard) {
+      this.activeCard.setActive(false);
+      this.activeCard = null;
+    }
+    if (this.sharedKeyboardContainer) {
+      this.sharedKeyboardContainer.style.display = "none";
+      this.sharedKeyboardContainer.empty();
+    }
+    this.sharedKeyboard = null;
   }
 
   private renderForm(container: HTMLElement, view: EditorView) {
     container.empty();
+    this.sharedKeyboardContainer = null;
 
     const titleRow = container.createEl("div", { cls: "heti-form-row" });
     titleRow.createEl("label", { cls: "heti-form-label", text: "标题" });
@@ -218,6 +273,11 @@ class PoemFormWidget extends WidgetType {
       this.renderLine(linesContainer, line, lineIndex, view);
     });
 
+    this.sharedKeyboardContainer = container.createEl("div", {
+      cls: "heti-shared-keyboard",
+    });
+    this.sharedKeyboardContainer.style.display = "none";
+
     const addLineBtn = container.createEl("button", {
       cls: "heti-form-add-line",
       text: "+ 添加一行",
@@ -251,7 +311,7 @@ class PoemFormWidget extends WidgetType {
       this.formData.lines[lineIndex] = newLine;
       this.rebuildCharCards();
       this.renderForm(this.formContainer!, view);
-      this.syncToEditor();
+      requestAnimationFrame(() => this.syncToEditor());
     });
 
     inputEl.addEventListener("keydown", (e) => {
@@ -268,7 +328,6 @@ class PoemFormWidget extends WidgetType {
     const cards = this.charCards[lineIndex] || [];
     cards.forEach((card) => {
       charContainer.appendChild(card.getElement());
-      charContainer.appendChild(card.getKeyboardElement());
     });
 
     if (this.formData.lines.length > 1) {
@@ -293,7 +352,13 @@ class PoemFormWidget extends WidgetType {
     const currentContent = view.editor.getValue();
 
     if (currentContent !== html) {
+      const cm = (view.editor as any).cm || (view.editor as any).editor;
+      const scrollEl = cm?.dom?.closest?.(".cm-scroller") || cm?.scrollDOM;
+      const scrollTop = scrollEl?.scrollTop ?? 0;
       view.editor.setValue(html);
+      requestAnimationFrame(() => {
+        if (scrollEl) scrollEl.scrollTop = scrollTop;
+      });
     }
   }
 
