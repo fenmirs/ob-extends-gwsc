@@ -11,6 +11,7 @@ import {
 } from "./poem-data";
 import { CharCard } from "./char-card";
 import { viewModeField, setViewMode } from "./view-mode";
+import { getDefaultFont, getAvailableChineseFonts } from "./font-detector";
 
 class PoemFormWidget extends WidgetType {
   private plugin: Plugin;
@@ -133,6 +134,53 @@ class PoemFormWidget extends WidgetType {
     });
     typeSelect.addEventListener("change", () => {
       this.formData.hetiType = typeSelect.value as PoemFormData["hetiType"];
+      this.syncToEditor();
+    });
+
+    const fontRow = container.createEl("div", { cls: "heti-form-row" });
+    fontRow.createEl("label", { cls: "heti-form-label", text: "字体" });
+    const fontSelect = fontRow.createEl("select", {
+      cls: "heti-form-select",
+    });
+    
+    const defaultOpt = fontSelect.createEl("option", { value: "", text: "默认" });
+    if (!this.formData.font) defaultOpt.selected = true;
+    
+    const availableFonts = getAvailableChineseFonts();
+    availableFonts.forEach((fontName) => {
+      const opt = fontSelect.createEl("option", { value: fontName, text: fontName });
+      if (fontName === this.formData.font) opt.selected = true;
+    });
+    
+    fontSelect.addEventListener("change", () => {
+      this.formData.font = fontSelect.value;
+      this.syncToEditor();
+    });
+
+    const fontSizeRow = container.createEl("div", { cls: "heti-form-row" });
+    fontSizeRow.createEl("label", { cls: "heti-form-label", text: "字号" });
+    const fontSizeSelect = fontSizeRow.createEl("select", {
+      cls: "heti-form-select",
+    });
+    
+    const fontSizes = [
+      { value: 0, label: "默认" },
+      { value: 16, label: "16px" },
+      { value: 18, label: "18px" },
+      { value: 20, label: "20px" },
+      { value: 24, label: "24px" },
+      { value: 28, label: "28px" },
+      { value: 32, label: "32px" },
+      { value: 36, label: "36px" },
+    ];
+    
+    fontSizes.forEach(({ value, label }) => {
+      const opt = fontSizeSelect.createEl("option", { value: String(value), text: label });
+      if (value === this.formData.fontSize) opt.selected = true;
+    });
+    
+    fontSizeSelect.addEventListener("change", () => {
+      this.formData.fontSize = Number(fontSizeSelect.value);
       this.syncToEditor();
     });
 
