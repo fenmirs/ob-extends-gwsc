@@ -61,11 +61,13 @@
 .markdown-preview-section .heti ruby { ruby-align: center; }
 .markdown-preview-section .heti rt { font-size: 0.5em; }
 
-/* 表单模式下隐藏编辑器文字行，保留 Widget */
-.heti-form-mode .cm-content .cm-line {
+/* 表单模式下隐藏编辑器文字，保留 Widget */
+.heti-form-mode .cm-content {
   visibility: hidden;
-  height: 0;
-  overflow: hidden;
+}
+.heti-form-mode .heti-poem-form,
+.heti-form-mode .heti-mode-switcher {
+  visibility: visible;
 }
 
 /* 模式切换栏 */
