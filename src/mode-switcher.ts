@@ -79,10 +79,8 @@ export function createModeSwitcher(plugin: Plugin) {
 
       buildDecorations(view: EditorView): DecorationSet {
         const file = getFileForView(plugin, view);
-        console.log("[Heti switcher] file:", file?.path);
         if (!file) return emptyDeco;
         const cache = plugin.app.metadataCache.getFileCache(file);
-        console.log("[Heti switcher] heti:", cache?.frontmatter?.heti);
         if (!cache?.frontmatter?.heti) return emptyDeco;
         return Decoration.set([{ from: 0, to: 0, value: this.deco }]);
       }

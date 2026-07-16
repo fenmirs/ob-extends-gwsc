@@ -350,24 +350,19 @@ export function createFormWidget(plugin: Plugin) {
 
       buildDecorations(view: EditorView): DecorationSet {
         const mode = view.state.field(viewModeField);
-        console.log("[Heti form] mode:", mode);
         if (mode !== "form") return emptyDeco;
 
         const file = this.getFileForView(view);
-        console.log("[Heti form] file:", file?.path);
         if (!file) return emptyDeco;
         const cache = plugin.app.metadataCache.getFileCache(file);
-        console.log("[Heti form] heti:", cache?.frontmatter?.heti);
         if (!cache?.frontmatter?.heti) return emptyDeco;
 
-        console.log("[Heti form] showing form widget");
         return Decoration.set([{ from: 0, to: 0, value: this.deco }]);
       }
 
       private syncFormModeClass(view: EditorView) {
         const isForm = this.decorations !== emptyDeco;
         const editorEl = (view as any).dom?.closest?.(".cm-editor");
-        console.log("[Heti form] syncClass isForm:", isForm, "editorEl:", !!editorEl);
         if (editorEl) {
           editorEl.classList.toggle("heti-form-mode", isForm);
         }
