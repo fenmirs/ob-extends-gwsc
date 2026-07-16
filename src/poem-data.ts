@@ -12,6 +12,8 @@ export interface PoemFormData {
   hetiType: "poetry" | "ancient" | "vertical";
   dynasty: string;
   author: string;
+  font: string;
+  fontSize: number;
   lines: PoemLine[];
 }
 
@@ -21,6 +23,8 @@ export function createEmptyForm(): PoemFormData {
     hetiType: "poetry",
     dynasty: "",
     author: "",
+    font: "",
+    fontSize: 0,
     lines: [{ chars: [] }],
   };
 }
@@ -78,13 +82,20 @@ export function generatePoemHtml(data: PoemFormData): string {
   let frontmatter = `---\nheti: ${data.hetiType}\n`;
   if (data.dynasty) frontmatter += `朝代: "${escapeYamlValue(data.dynasty)}"\n`;
   if (data.author) frontmatter += `作者: "${escapeYamlValue(data.author)}"\n`;
+  if (data.font) frontmatter += `字体: "${escapeYamlValue(data.font)}"\n`;
+  if (data.fontSize > 0) frontmatter += `字号: ${data.fontSize}\n`;
   frontmatter += "---\n\n";
 
   const titleSpan = data.dynasty || data.author
     ? `<span class="heti-meta heti-small">[${escapeHtml(data.dynasty)}]<abbr title="${escapeHtml(data.author)}">${escapeHtml(data.author)}</abbr></span>`
     : "";
 
-  return `${frontmatter}<div class="${containerClass}">
+  const styleParts: string[] = [];
+  if (data.font) styleParts.push(`--heti-font: ${data.font}`);
+  if (data.fontSize > 0) styleParts.push(`--heti-font-size: ${data.fontSize}px`);
+  const styleAttr = styleParts.length > 0 ? ` style="${styleParts.join("; ")}"` : "";
+
+  return `${frontmatter}<div class="${containerClass}"${styleAttr}>
   <h2>${escapeHtml(data.title)}${titleSpan}</h2>
   <p class="heti-x-large">
 ${lines}
@@ -99,6 +110,8 @@ export function parseExistingPoem(
   const fmType = frontmatter?.heti || "poetry";
   const dynasty = frontmatter?.朝代 || "";
   const author = frontmatter?.作者 || "";
+  const font = frontmatter?.字体 || "";
+  const fontSize = typeof frontmatter?.字号 === "number" ? frontmatter.字号 : 0;
 
   const titleMatch = content.match(/<h2>(.*?)<span/);
   const title = titleMatch
@@ -140,6 +153,8 @@ export function parseExistingPoem(
     hetiType: fmType as PoemFormData["hetiType"],
     dynasty,
     author,
+    font,
+    fontSize,
     lines: lines.length > 0 ? lines : [{ chars: [] }],
   };
 }
