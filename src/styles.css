@@ -302,3 +302,17 @@
 .heti-pinyin-confirm:hover {
   opacity: 0.9;
 }
+
+/* 诗词字体和字号配置 */
+.heti {
+  font-family: var(--heti-font, inherit);
+}
+.heti .heti-x-large {
+  font-size: var(--heti-font-size, inherit);
+}
+.heti h2 {
+  font-size: calc(var(--heti-font-size, 24px) * 1.5);
+}
+.heti .heti-meta {
+  font-size: calc(var(--heti-font-size, 24px) * 0.75);
+}
