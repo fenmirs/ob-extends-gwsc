@@ -1,3 +1,7 @@
+.sc-hidden {
+  display: none !important;
+}
+
 /* View container */
 .sc-view-container {
   display: flex;

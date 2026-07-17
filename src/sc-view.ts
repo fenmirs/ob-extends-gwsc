@@ -80,22 +80,19 @@ export class ScView extends ItemView {
 
     this.formEl = container.createEl("div", { cls: "sc-form-wrapper" });
 
-    this.exportBar = container.createEl("div", { cls: "sc-export-bar" });
-    this.exportBar.style.display = "none";
+    this.exportBar = container.createEl("div", { cls: "sc-export-bar sc-hidden" });
     this.exportBar.createEl("button", {
       cls: "sc-toolbar-btn",
       text: "导出 HTML",
     }).addEventListener("click", () => exportAsHtml(this.formData));
 
     this.previewEl = container.createEl("div", {
-      cls: "sc-preview-wrapper",
+      cls: "sc-preview-wrapper sc-hidden",
     });
-    this.previewEl.style.display = "none";
 
     this.keyboardContainer = container.createEl("div", {
-      cls: "sc-keyboard-container",
+      cls: "sc-keyboard-container sc-hidden",
     });
-    this.keyboardContainer.style.display = "none";
   }
 
   async onClose() {
@@ -138,21 +135,30 @@ export class ScView extends ItemView {
   }
 
   private showEdit() {
-    if (this.formEl) this.formEl.style.display = "";
-    if (this.exportBar) this.exportBar.style.display = "none";
-    if (this.previewEl) this.previewEl.style.display = "none";
+    if (this.formEl) this.formEl.removeClass("sc-hidden");
+    if (this.exportBar) this.exportBar.addClass("sc-hidden");
+    if (this.previewEl) this.previewEl.addClass("sc-hidden");
   }
 
   private showPreview() {
-    if (this.formEl) this.formEl.style.display = "none";
-    if (this.exportBar) this.exportBar.style.display = "";
+    if (this.formEl) this.formEl.addClass("sc-hidden");
+    if (this.exportBar) this.exportBar.removeClass("sc-hidden");
     if (this.keyboardContainer) {
-      this.keyboardContainer.style.display = "none";
+      this.keyboardContainer.addClass("sc-hidden");
       this.keyboardContainer.empty();
     }
     if (this.previewEl) {
-      this.previewEl.style.display = "";
-      this.previewEl.innerHTML = generatePoemHtml(this.formData);
+      this.previewEl.removeClass("sc-hidden");
+      this.previewEl.empty();
+      const doc = new DOMParser().parseFromString(
+        generatePoemHtml(this.formData),
+        "text/html"
+      );
+      const fragment = document.createDocumentFragment();
+      while (doc.body.firstChild) {
+        fragment.appendChild(doc.body.firstChild);
+      }
+      this.previewEl.appendChild(fragment);
     }
   }
 
@@ -228,7 +234,7 @@ export class ScView extends ItemView {
 
     this.keyboardContainer!.empty();
     this.keyboardContainer!.appendChild(this.sharedKeyboard.getElement());
-    this.keyboardContainer!.style.display = "";
+    this.keyboardContainer!.removeClass("sc-hidden");
   }
 
   private closeKeyboard() {
@@ -237,7 +243,7 @@ export class ScView extends ItemView {
       this.activeCard = null;
     }
     if (this.keyboardContainer) {
-      this.keyboardContainer.style.display = "none";
+      this.keyboardContainer.addClass("sc-hidden");
       this.keyboardContainer.empty();
     }
     this.sharedKeyboard = null;
