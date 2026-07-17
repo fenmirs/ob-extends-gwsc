@@ -1,4 +1,4 @@
-import { ItemView, TFile, WorkspaceLeaf } from "obsidian";
+import { ItemView, TFile, WorkspaceLeaf, setIcon } from "obsidian";
 import {
   PoemFormData,
   PoemLine,
@@ -444,11 +444,11 @@ export class ScView extends ItemView {
 
     const toggleBtn = footer.createEl("button", {
       cls: "sc-form-line-toggle",
-      text: "\u25BC",
     });
+    setIcon(toggleBtn, "circle-chevron-up");
     toggleBtn.addEventListener("click", () => {
       lineEl.toggleClass("collapsed", !lineEl.hasClass("collapsed"));
-      toggleBtn.textContent = lineEl.hasClass("collapsed") ? "\u25B6" : "\u25BC";
+      setIcon(toggleBtn, lineEl.hasClass("collapsed") ? "circle-chevron-down" : "circle-chevron-up");
     });
 
     if (this.formData.lines.length > 1) {

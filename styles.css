@@ -142,9 +142,16 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 10px;
-  padding: 2px 4px;
+  /* padding: 2px 4px; */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+}
+
+.sc-form-line-toggle svg {
+  width: 14px;
+  height: 14px;
 }
 
 .sc-form-line-toggle:hover {
@@ -167,7 +174,7 @@
 }
 
 .sc-form-textarea {
-  flex: 1;
+  /* flex: 1;  */
   padding: 6px 8px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
@@ -176,9 +183,10 @@
   font-size: 14px;
   font-family: inherit;
   resize: vertical;
-  min-height: 28px;
+  min-height: 35px;
+  height: 35px;
   max-height: 140px;
-  line-height: 24px;
+  line-height: 20px;
 }
 
 /* Add line button */
@@ -272,16 +280,16 @@
 
 /* Pinyin keyboard */
 .heti-pinyin-keyboard {
-  padding: 10px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
-  background: var(--background-secondary);
+  padding: 8px;
+  border: 1px solid #e6eced;
+  border-radius: 16px;
+  box-shadow: -1px -1px 20px 0px #fbe8e8;
 }
 
 .heti-pinyin-preview {
   padding: 10px;
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--text-normal);
   border-bottom: 1px solid var(--background-modifier-border);
