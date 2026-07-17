@@ -15,6 +15,7 @@
   border-bottom: 1px solid var(--background-modifier-border);
   flex-shrink: 0;
 }
+
 .sc-toolbar-btn {
   padding: 4px 12px;
   border-radius: 4px;
@@ -25,10 +26,12 @@
   border: none;
   transition: background 0.15s, color 0.15s;
 }
+
 .sc-toolbar-btn:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
 }
+
 .sc-toolbar-btn.active {
   background: var(--interactive-accent);
   color: var(--text-on-accent);
@@ -62,6 +65,7 @@
   gap: 8px;
   margin-bottom: 8px;
 }
+
 .sc-form-label {
   min-width: 48px;
   font-weight: 500;
@@ -69,6 +73,7 @@
   color: var(--text-normal);
   flex-shrink: 0;
 }
+
 .sc-form-input {
   flex: 1;
   padding: 6px 8px;
@@ -78,6 +83,7 @@
   color: var(--text-normal);
   font-size: 14px;
 }
+
 .sc-form-select {
   padding: 6px 8px;
   border: 1px solid var(--background-modifier-border);
@@ -94,6 +100,7 @@
   gap: 8px;
   margin-top: 16px;
 }
+
 .sc-form-line {
   display: flex;
   flex-direction: column;
@@ -103,6 +110,7 @@
   border-radius: 6px;
   background: var(--background-secondary);
 }
+
 .sc-form-line-delete {
   align-self: flex-end;
   background: none;
@@ -113,6 +121,7 @@
   padding: 0 6px;
   line-height: 1;
 }
+
 .sc-form-line-delete:hover {
   color: var(--text-error);
 }
@@ -128,6 +137,7 @@
   color: var(--text-muted);
   font-size: 14px;
 }
+
 .sc-form-add-line:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
@@ -155,25 +165,30 @@
   background: var(--background-primary);
   transition: border-color 0.15s, background 0.15s;
 }
+
 .heti-char-card:hover {
   border-color: var(--interactive-accent);
   background: var(--background-secondary);
 }
+
 .heti-char-card.active {
   border-color: var(--interactive-accent);
   background: var(--interactive-accent-hover);
 }
+
 .heti-char {
   font-size: 18px;
   font-weight: 500;
   color: var(--text-normal);
 }
+
 .heti-char-pinyin {
   font-size: 11px;
   color: var(--text-muted);
   margin-top: 2px;
   min-height: 14px;
 }
+
 .heti-char-delete {
   position: absolute;
   top: -6px;
@@ -190,9 +205,11 @@
   cursor: pointer;
   line-height: 1;
 }
+
 .heti-char-card.hovered .heti-char-delete {
   display: flex;
 }
+
 .heti-char-delete:hover {
   background: var(--text-error);
   color: var(--text-on-accent);
@@ -205,6 +222,7 @@
   border-radius: 6px;
   background: var(--background-secondary);
 }
+
 .heti-pinyin-preview {
   padding: 10px;
   text-align: center;
@@ -214,6 +232,7 @@
   border-bottom: 1px solid var(--background-modifier-border);
   margin-bottom: 8px;
 }
+
 .heti-pinyin-row {
   display: flex;
   flex-wrap: wrap;
@@ -221,14 +240,17 @@
   margin-bottom: 6px;
   align-items: center;
 }
+
 .heti-pinyin-row-indent {
   padding-left: 44px;
 }
+
 .heti-pinyin-label {
   min-width: 40px;
   font-size: 13px;
   color: var(--text-muted);
 }
+
 .heti-pinyin-btn {
   padding: 4px 8px;
   border: 1px solid var(--background-modifier-border);
@@ -239,9 +261,11 @@
   font-size: 13px;
   transition: background 0.1s;
 }
+
 .heti-pinyin-btn:hover {
   background: var(--background-modifier-hover);
 }
+
 .heti-pinyin-actions {
   display: flex;
   justify-content: flex-end;
@@ -250,17 +274,21 @@
   padding-top: 8px;
   border-top: 1px solid var(--background-modifier-border);
 }
+
 .heti-pinyin-confirm {
   background: var(--interactive-accent);
   color: var(--text-on-accent);
 }
+
 .heti-pinyin-confirm:hover {
   opacity: 0.9;
 }
+
 .heti-pinyin-close {
   background: var(--background-modifier-hover);
   color: var(--text-muted);
 }
+
 .heti-pinyin-close:hover {
   background: var(--background-modifier-border);
   color: var(--text-normal);
@@ -272,47 +300,102 @@
   padding: 16px;
   font-family: var(--heti-font, inherit);
 }
+
 .heti h2 {
   font-size: calc(var(--heti-font-size, 24px) * 1.5);
   margin: 0 0 0.25em;
 }
-.poetry-title,.ancient-title{
+
+.poetry-title,
+.ancient-title {
   text-align: center;
   padding-bottom: 0.5em;
 }
+
 .heti .heti-x-large {
   font-size: var(--heti-font-size, 20px);
   line-height: 1.8;
 }
+
+.heti--ancient .heti-x-large {
+  line-height: 2.5;
+}
+
+.heti--vertical .heti-x-large {
+  line-height: 2.5;
+}
+
 .heti .heti-meta {
   font-size: calc(var(--heti-font-size, 24px) * 0.75);
   margin-left: 0.5em;
   color: var(--text-muted);
 }
+
 .heti--ancient .heti-meta {
   display: block;
   text-align: center;
   margin-left: 0;
   margin-top: 0.25em;
 }
+
 .heti--vertical {
   writing-mode: vertical-rl;
   text-orientation: upright;
   max-height: 80vh;
   overflow-x: auto;
 }
-.heti--vertical .heti-dynasty-bracket {
-  writing-mode: horizontal-tb;
+
+.heti-vertical-header {
+  text-align: center;
 }
+
+.heti-vertical-title {
+  font-size: calc(var(--heti-font-size, 24px) * 1.5);
+  font-weight: bold;
+}
+
+.heti-vertical-meta {
+  flex-direction: row;
+  display: inline-flex;
+  gap: 0.5em;
+  font-size: calc(var(--heti-font-size, 24px) * 0.75);
+  color: var(--text-muted);
+}
+
+.heti-vertical-dynasty {
+  writing-mode: sideways-rl;
+}
+
+.heti--vertical .heti-line {
+  display: block;
+  text-indent: 2.5em;
+  margin-left: 1em;
+}
+
+.heti--ancient .heti-line {
+  display: block;
+  text-indent: 2.5em;
+  margin-bottom: 1em;
+}
+
+.heti--poetry .heti-line {
+  display: block;
+  margin-bottom: 1em;
+}
+
 .heti ruby {
   ruby-align: center;
 }
+
 .heti rt {
-  font-size: 0.5em;
+  font-size: 0.6em;
+  padding-bottom: 4px;
 }
+
 .heti {
-  --heti-char-gap: 0.25em;
+  --heti-char-gap: 0.15em;
 }
+
 .heti-char {
   margin-right: var(--heti-char-gap);
 }

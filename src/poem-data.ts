@@ -49,13 +49,13 @@ export function fromJSON(json: string): PoemFormData {
       lines:
         Array.isArray(parsed.lines) && parsed.lines.length > 0
           ? parsed.lines.map((l: any) => ({
-              chars: Array.isArray(l.chars)
-                ? l.chars.map((c: any) => ({
-                    char: c.char || "",
-                    pinyin: c.pinyin || undefined,
-                  }))
-                : [],
-            }))
+            chars: Array.isArray(l.chars)
+              ? l.chars.map((c: any) => ({
+                char: c.char || "",
+                pinyin: c.pinyin || undefined,
+              }))
+              : [],
+          }))
           : [{ chars: [] }],
     };
   } catch {
@@ -79,10 +79,10 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function buildRubyHtml(chars: CharData[]): string {
+function buildRubyHtml(type: string, chars: CharData[]): string {
   return chars
     .map((c) => {
-      if (c.pinyin) {
+      if (c.pinyin && (type === "ancient" || type === "poetry")) {
         return `<span class="heti-char"><ruby>${escapeHtml(c.char)}<rt>${escapeHtml(c.pinyin)}</rt></ruby></span>`;
       }
       return `<span class="heti-char">${escapeHtml(c.char)}</span>`;
@@ -93,37 +93,35 @@ function buildRubyHtml(chars: CharData[]): string {
 export function generatePoemHtml(data: PoemFormData): string {
   const lines = data.lines
     .filter((line) => line.chars.length > 0)
-    .map((line) => buildRubyHtml(line.chars))
-    .join("<br>\n");
+    .map((line) => {
+      const content = buildRubyHtml(data.hetiType, line.chars);
+      return `  <span class="heti-line">${content}</span>`;
+    })
+    .join("\n");
 
-  const containerClass =
-    data.hetiType === "vertical"
-      ? "heti heti--vertical"
-      : `heti heti--${data.hetiType}`;
-
+  const containerClass = `heti heti--${data.hetiType}`;
   let titleHtml = "";
   if (data.title) {
     if (data.hetiType === "ancient") {
       const metaParts: string[] = [];
-      if (data.dynasty) metaParts.push(`（${escapeHtml(data.dynasty)}）`);
       if (data.author) metaParts.push(escapeHtml(data.author));
+      if (data.dynasty) metaParts.push(`（${escapeHtml(data.dynasty)}）`);
       const meta =
         metaParts.length > 0
           ? `\n  <div class="heti-meta">${metaParts.join(" ")}</div>`
           : "";
       titleHtml = `<h2 class="ancient-title">${escapeHtml(data.title)}</h2>${meta}`;
     } else if (data.hetiType === "vertical") {
-      const metaParts: string[] = [];
-      if (data.dynasty)
-        metaParts.push(
-          `<span class="heti-dynasty-bracket">（${escapeHtml(data.dynasty)}）</span>`
-        );
-      if (data.author) metaParts.push(escapeHtml(data.author));
-      const meta =
-        metaParts.length > 0
-          ? `<span class="heti-meta">${metaParts.join(" ")}</span>`
-          : "";
-      titleHtml = `<h2>${escapeHtml(data.title)}${meta}</h2>`;
+      const dynastyHtml = data.dynasty
+        ? `<span class="heti-vertical-dynasty">（${escapeHtml(data.dynasty)}）</span>`
+        : "";
+      const authorHtml = data.author
+        ? `<span class="heti-vertical-author">${escapeHtml(data.author)}</span>`
+        : "";
+      titleHtml = `<div class="heti-vertical-header">
+  <div class="heti-vertical-title">${escapeHtml(data.title)}</div>
+  <div class="heti-vertical-meta">${authorHtml}${dynastyHtml}</div>
+</div>`;
     } else {
       const metaParts: string[] = [];
       if (data.dynasty) metaParts.push(`[${escapeHtml(data.dynasty)}]`);
