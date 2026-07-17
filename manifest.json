@@ -1,6 +1,6 @@
 {
   "id": "ancient-poetry-printer",
-  "name": "古文诗词排版工具(Ancient Poetry Printer)",
+  "name": "Ancient Poetry Printer",
   "version": "1.0.0",
   "minAppVersion": "0.15.0",
   "description": "基于赫蹏(https://sivan.github.io/heti/)为古文诗词提供表单化编辑和专业排版渲染",
