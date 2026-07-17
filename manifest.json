@@ -1,9 +1,9 @@
 {
-  "id": "obsidian-heti",
-  "name": "Heti 中文诗词排版插件",
+  "id": "obsidian-gwsc",
+  "name": "古文诗词排版插件",
   "version": "0.2.0",
   "minAppVersion": "0.15.0",
-  "description": "为中文诗词、古文提供表单化编辑和专业排版渲染",
-  "author": "heti",
+  "description": "基于赫蹏(https://sivan.github.io/heti/)为古文诗词提供表单化编辑和专业排版渲染",
+  "author": "fenmirs",
   "isDesktopOnly": false
 }

@@ -9,17 +9,17 @@ export default class HetiPlugin extends Plugin {
 
     this.addCommand({
       id: "new-poem",
-      name: "新建诗词",
+      name: "新建古文诗词",
       callback: () => this.createNewPoem(),
     });
   }
 
   async createNewPoem() {
-    const folderPath = "诗词";
+    const folderPath = "古文诗词";
     if (!(await this.app.vault.adapter.exists(folderPath))) {
       await this.app.vault.createFolder(folderPath);
     }
-    const baseName = `${folderPath}/新建诗词`;
+    const baseName = `${folderPath}/新建古文诗词`;
     let filePath = `${baseName}.sc`;
     let counter = 1;
     while (await this.app.vault.adapter.exists(filePath)) {

@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-heti",
+  "name": "obsidian-gwsc",
   "version": "0.1.0",
-  "description": "基于 Heti CSS 的中文诗词排版增强插件",
+  "description": "基于 Heti CSS 的古文诗词排版增强插件（具体样式餐卡https://sivan.github.io/heti/）",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",

@@ -26,7 +26,7 @@ powershell -Command "Copy-Item src\styles.css styles.css -Force; node esbuild.co
 
 ### 部署到 Obsidian
 
-将以下文件复制到 Vault 的 `.obsidian/plugins/obsidian-heti/` 目录：
+将以下文件复制到 Vault 的 `.obsidian/plugins/obsidian-gwsc/` 目录：
 
 ```
 main.js
