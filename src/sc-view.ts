@@ -35,7 +35,7 @@ export class ScView extends ItemView {
   }
 
   getDisplayText(): string {
-    return this.file?.basename || "诗词";
+    return this.file?.basename || "古文诗词";
   }
 
   getIcon(): string {
@@ -51,11 +51,11 @@ export class ScView extends ItemView {
 
     const editBtn = toolbar.createEl("button", {
       cls: "sc-toolbar-btn active",
-      text: "\u7f16\u8f91",
+      text: "编辑",
     });
     const previewBtn = toolbar.createEl("button", {
       cls: "sc-toolbar-btn",
-      text: "\u9884\u89c8",
+      text: "预览",
     });
 
     editBtn.addEventListener("click", () => {
@@ -102,7 +102,6 @@ export class ScView extends ItemView {
   }
 
   async loadFile() {
-    // Try to get file path from view state first
     const state = this.leaf.getViewState();
     const stateFile = (state as any)?.state?.file;
     let file: TFile | null = null;
@@ -234,13 +233,12 @@ export class ScView extends ItemView {
   private renderMetaFields() {
     const container = this.formEl!;
 
-    // Title
     const titleRow = container.createEl("div", { cls: "sc-form-row" });
-    titleRow.createEl("label", { cls: "sc-form-label", text: "\u6807\u9898" });
+    titleRow.createEl("label", { cls: "sc-form-label", text: "标题" });
     const titleInput = titleRow.createEl("input", {
       cls: "sc-form-input",
       type: "text",
-      placeholder: "\u8f93\u5165\u8bd7\u8bcd\u6807\u9898",
+      placeholder: "输入古文诗词标题",
     });
     titleInput.value = this.formData.title;
     titleInput.addEventListener("input", () => {
@@ -248,15 +246,14 @@ export class ScView extends ItemView {
       this.syncToFile();
     });
 
-    // Type
     const typeRow = container.createEl("div", { cls: "sc-form-row" });
-    typeRow.createEl("label", { cls: "sc-form-label", text: "\u7c7b\u578b" });
+    typeRow.createEl("label", { cls: "sc-form-label", text: "类型" });
     const typeSelect = typeRow.createEl("select", { cls: "sc-form-select" });
     (
       [
-        { value: "poetry", label: "\u8bd7\u8bcd" },
-        { value: "ancient", label: "\u53e4\u6587" },
-        { value: "vertical", label: "\u7ad6\u6392" },
+        { value: "poetry", label: "诗词" },
+        { value: "ancient", label: "古文" },
+        { value: "vertical", label: "竖排" },
       ] as const
     ).forEach(({ value, label }) => {
       const opt = typeSelect.createEl("option", { value, text: label });
@@ -267,13 +264,12 @@ export class ScView extends ItemView {
       this.syncToFile();
     });
 
-    // Font
     const fontRow = container.createEl("div", { cls: "sc-form-row" });
-    fontRow.createEl("label", { cls: "sc-form-label", text: "\u5b57\u4f53" });
+    fontRow.createEl("label", { cls: "sc-form-label", text: "字体" });
     const fontSelect = fontRow.createEl("select", { cls: "sc-form-select" });
     const defaultOpt = fontSelect.createEl("option", {
       value: "",
-      text: "\u9ed8\u8ba4",
+      text: "默认",
     });
     if (!this.formData.font) defaultOpt.selected = true;
     getAvailableChineseFonts().forEach((fontName) => {
@@ -288,13 +284,12 @@ export class ScView extends ItemView {
       this.syncToFile();
     });
 
-    // Font size
     const sizeRow = container.createEl("div", { cls: "sc-form-row" });
-    sizeRow.createEl("label", { cls: "sc-form-label", text: "\u5b57\u53f7" });
+    sizeRow.createEl("label", { cls: "sc-form-label", text: "字号" });
     const sizeSelect = sizeRow.createEl("select", { cls: "sc-form-select" });
     (
       [
-        { value: 0, label: "\u9ed8\u8ba4" },
+        { value: 0, label: "默认" },
         { value: 16, label: "16px" },
         { value: 18, label: "18px" },
         { value: 20, label: "20px" },
@@ -315,13 +310,12 @@ export class ScView extends ItemView {
       this.syncToFile();
     });
 
-    // Char gap
     const gapRow = container.createEl("div", { cls: "sc-form-row" });
-    gapRow.createEl("label", { cls: "sc-form-label", text: "\u5b57\u8ddd" });
+    gapRow.createEl("label", { cls: "sc-form-label", text: "字距" });
     const gapSelect = gapRow.createEl("select", { cls: "sc-form-select" });
     (
       [
-        { value: 0, label: "\u9ed8\u8ba4" },
+        { value: 0, label: "默认" },
         { value: 0.1, label: "0.1em" },
         { value: 0.15, label: "0.15em" },
         { value: 0.2, label: "0.2em" },
@@ -342,16 +336,15 @@ export class ScView extends ItemView {
       this.syncToFile();
     });
 
-    // Dynasty
     const dynastyRow = container.createEl("div", { cls: "sc-form-row" });
     dynastyRow.createEl("label", {
       cls: "sc-form-label",
-      text: "\u671d\u4ee3",
+      text: "时期",
     });
     const dynastyInput = dynastyRow.createEl("input", {
       cls: "sc-form-input",
       type: "text",
-      placeholder: "\u5982\uff1a\u5510\u3001\u5b8b",
+      placeholder: "如：唐、宋、公元前369～公元前286年",
     });
     dynastyInput.value = this.formData.dynasty;
     dynastyInput.addEventListener("input", () => {
@@ -359,16 +352,15 @@ export class ScView extends ItemView {
       this.syncToFile();
     });
 
-    // Author
     const authorRow = container.createEl("div", { cls: "sc-form-row" });
     authorRow.createEl("label", {
       cls: "sc-form-label",
-      text: "\u4f5c\u8005",
+      text: "作者",
     });
     const authorInput = authorRow.createEl("input", {
       cls: "sc-form-input",
       type: "text",
-      placeholder: "\u5982\uff1a\u674e\u767d",
+      placeholder: "如：李白、诸葛亮",
     });
     authorInput.value = this.formData.author;
     authorInput.addEventListener("input", () => {
@@ -397,7 +389,7 @@ export class ScView extends ItemView {
     const inputEl = lineEl.createEl("input", {
       cls: "sc-form-input",
       type: "text",
-      placeholder: `\u7b2c ${lineIndex + 1} \u53e5`,
+      placeholder: `第 ${lineIndex + 1} 句`,
     });
     inputEl.value = charsToText(line.chars);
 
@@ -440,7 +432,7 @@ export class ScView extends ItemView {
   private renderAddButton() {
     const btn = this.formEl!.createEl("button", {
       cls: "sc-form-add-line",
-      text: "+ \u6dfb\u52a0\u4e00\u884c",
+      text: "+ 添加一行",
     });
     btn.addEventListener("click", () => {
       this.formData.lines.push({ chars: [] });

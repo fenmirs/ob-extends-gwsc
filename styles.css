@@ -322,7 +322,7 @@
 }
 
 .heti--vertical .heti-x-large {
-  line-height: 2.5;
+  line-height: 1.8;
 }
 
 .heti .heti-meta {
@@ -380,7 +380,7 @@
 
 .heti--poetry .heti-line {
   display: block;
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
 }
 
 .heti ruby {

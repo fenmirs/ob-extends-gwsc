@@ -5,27 +5,27 @@ export const INITIALS = [
 ];
 
 export const FINALS = [
-  "a", "o", "e", "i", "u", "\u00fc",
+  "a", "o", "e", "i", "u", "ü",
   "ai", "ei", "ao", "ou", "an", "en", "ang", "eng", "ong",
   "ia", "ie", "iu", "iao", "ian", "in", "iang", "ing", "iong",
   "ua", "uo", "uai", "ui", "uan", "un", "uang",
-  "\u00fce", "\u00fcan", "\u00fcn",
+  "üe", "üan", "ün",
 ];
 
 export const TONES = ["\u0304", "\u0301", "\u030C", "\u0300"];
-export const TONE_LABELS = ["\u02c9", "\u00b4", "\u02c7", "\u0060"];
+export const TONE_LABELS = ["ˉ", "ˊ", "ˇ", "ˋ"];
 
 export function applyTone(vowel: string, tone: string): string {
   const toneIndex = TONES.indexOf(tone);
   if (toneIndex === -1) return vowel;
-  const baseVowels = "aeiou\u00fc";
+  const baseVowels = "aeiouü";
   const toned = [
-    ["\u0101", "\u00e1", "\u01ce", "\u00e0"],
-    ["\u0113", "\u00e9", "\u011b", "\u00e8"],
-    ["\u012b", "\u00ed", "\u01d0", "\u00ec"],
-    ["\u014d", "\u00f3", "\u01d2", "\u00f2"],
-    ["\u016b", "\u00fa", "\u01d4", "\u00f9"],
-    ["\u01d6", "\u01d8", "\u01da", "\u01dc"],
+    ["ā", "á", "ǎ", "à"],
+    ["ē", "é", "ě", "è"],
+    ["ī", "í", "ǐ", "ì"],
+    ["ō", "ó", "ǒ", "ò"],
+    ["ū", "ú", "ǔ", "ù"],
+    ["ǖ", "ǘ", "ǚ", "ǜ"],
   ];
   for (let i = 0; i < baseVowels.length; i++) {
     if (vowel.includes(baseVowels[i])) {
@@ -84,7 +84,7 @@ export class PinyinKeyboard {
     row.className = "heti-pinyin-row";
     const label = document.createElement("span");
     label.className = "heti-pinyin-label";
-    label.textContent = "\u58f0\u6bcd:";
+    label.textContent = "声母:";
     row.appendChild(label);
     INITIALS.forEach((ini) => {
       const btn = document.createElement("button");
@@ -104,7 +104,7 @@ export class PinyinKeyboard {
     row1.className = "heti-pinyin-row";
     const label = document.createElement("span");
     label.className = "heti-pinyin-label";
-    label.textContent = "\u97f5\u6bcd:";
+    label.textContent = "韵母:";
     row1.appendChild(label);
     FINALS.slice(0, 15).forEach((fin) => {
       const btn = document.createElement("button");
@@ -138,7 +138,7 @@ export class PinyinKeyboard {
     row.className = "heti-pinyin-row";
     const label = document.createElement("span");
     label.className = "heti-pinyin-label";
-    label.textContent = "\u58f0\u8c03:";
+    label.textContent = "声调:";
     row.appendChild(label);
     TONE_LABELS.forEach((labelText, i) => {
       const btn = document.createElement("button");
@@ -159,7 +159,7 @@ export class PinyinKeyboard {
 
     const clearBtn = document.createElement("button");
     clearBtn.className = "heti-pinyin-btn heti-pinyin-clear";
-    clearBtn.textContent = "\u6e05\u9664";
+    clearBtn.textContent = "清除";
     clearBtn.addEventListener("click", () => {
       this.initial = "";
       this.final = "";
@@ -171,7 +171,7 @@ export class PinyinKeyboard {
 
     const confirmBtn = document.createElement("button");
     confirmBtn.className = "heti-pinyin-btn heti-pinyin-confirm mod-cta";
-    confirmBtn.textContent = "\u786e\u8ba4";
+    confirmBtn.textContent = "确认";
     confirmBtn.addEventListener("click", () => {
       const pinyin = this.getPinyin();
       if (pinyin) this.onConfirm(pinyin);
@@ -180,7 +180,7 @@ export class PinyinKeyboard {
 
     const closeBtn = document.createElement("button");
     closeBtn.className = "heti-pinyin-btn heti-pinyin-close";
-    closeBtn.textContent = "\u5173\u95ed";
+    closeBtn.textContent = "关闭";
     closeBtn.addEventListener("click", () => this.onClose());
     actions.appendChild(closeBtn);
 
@@ -200,7 +200,7 @@ export class PinyinKeyboard {
     } else if (this.initial || this.final) {
       this.previewText.textContent = this.initial + this.final;
     } else {
-      this.previewText.textContent = "\u70b9\u51fb\u9009\u62e9\u58f0\u6bcd\u3001\u97f5\u6bcd\u3001\u58f0\u8c03";
+      this.previewText.textContent = "点击选择声母、韵母、声调";
     }
   }
 }

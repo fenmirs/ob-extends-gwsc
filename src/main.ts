@@ -9,17 +9,17 @@ export default class HetiPlugin extends Plugin {
 
     this.addCommand({
       id: "new-poem",
-      name: "\u65b0\u5efa\u8bd7\u8bcd",
+      name: "新建诗词",
       callback: () => this.createNewPoem(),
     });
   }
 
   async createNewPoem() {
-    const folderPath = "\u8bd7\u8bcd";
+    const folderPath = "诗词";
     if (!(await this.app.vault.adapter.exists(folderPath))) {
       await this.app.vault.createFolder(folderPath);
     }
-    const baseName = `${folderPath}/\u65b0\u5efa\u8bd7\u8bcd`;
+    const baseName = `${folderPath}/新建诗词`;
     let filePath = `${baseName}.sc`;
     let counter = 1;
     while (await this.app.vault.adapter.exists(filePath)) {
@@ -41,10 +41,6 @@ export default class HetiPlugin extends Plugin {
       2
     );
     const file = await this.app.vault.create(filePath, jsonData);
-    await this.openScFile(file);
-  }
-
-  async openScFile(file: TFile) {
     const leaf = this.app.workspace.getLeaf(true);
     await leaf.setViewState({
       type: SC_VIEW_TYPE,
