@@ -31,6 +31,38 @@ export function createEmptyForm(): PoemFormData {
   };
 }
 
+export function toJSON(data: PoemFormData): string {
+  return JSON.stringify(data, null, 2);
+}
+
+export function fromJSON(json: string): PoemFormData {
+  try {
+    const parsed = JSON.parse(json);
+    return {
+      title: parsed.title || "",
+      hetiType: parsed.hetiType || "poetry",
+      dynasty: parsed.dynasty || "",
+      author: parsed.author || "",
+      font: parsed.font || "",
+      fontSize: parsed.fontSize || 0,
+      charGap: parsed.charGap || 0,
+      lines:
+        Array.isArray(parsed.lines) && parsed.lines.length > 0
+          ? parsed.lines.map((l: any) => ({
+              chars: Array.isArray(l.chars)
+                ? l.chars.map((c: any) => ({
+                    char: c.char || "",
+                    pinyin: c.pinyin || undefined,
+                  }))
+                : [],
+            }))
+          : [{ chars: [] }],
+    };
+  } catch {
+    return createEmptyForm();
+  }
+}
+
 export function textToChars(text: string): CharData[] {
   return text.split("").map((char) => ({ char }));
 }
@@ -39,20 +71,12 @@ export function charsToText(chars: CharData[]): string {
   return chars.map((c) => c.char).join("");
 }
 
-export function textToLine(text: string): PoemLine {
-  return { chars: textToChars(text) };
-}
-
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-function escapeYamlValue(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 function buildRubyHtml(chars: CharData[]): string {
@@ -69,11 +93,7 @@ function buildRubyHtml(chars: CharData[]): string {
 export function generatePoemHtml(data: PoemFormData): string {
   const lines = data.lines
     .filter((line) => line.chars.length > 0)
-    .map((line, i, arr) => {
-      const content = buildRubyHtml(line.chars);
-      const punct = i % 2 === 0 ? "，" : "。";
-      return `    ${content}<span class="heti-hang">${punct}</span>`;
-    })
+    .map((line) => buildRubyHtml(line.chars))
     .join("<br>\n");
 
   const containerClass =
@@ -81,84 +101,54 @@ export function generatePoemHtml(data: PoemFormData): string {
       ? "heti heti--vertical"
       : `heti heti--${data.hetiType}`;
 
-  let frontmatter = `---\nheti: ${data.hetiType}\n`;
-  if (data.dynasty) frontmatter += `朝代: "${escapeYamlValue(data.dynasty)}"\n`;
-  if (data.author) frontmatter += `作者: "${escapeYamlValue(data.author)}"\n`;
-  if (data.font) frontmatter += `字体: "${escapeYamlValue(data.font)}"\n`;
-  if (data.fontSize > 0) frontmatter += `字号: ${data.fontSize}\n`;
-  if (data.charGap > 0) frontmatter += `字距: ${data.charGap}\n`;
-  frontmatter += "---\n\n";
-
-  const titleSpan = data.dynasty || data.author
-    ? `<span class="heti-meta heti-small">[${escapeHtml(data.dynasty)}]<abbr title="${escapeHtml(data.author)}">${escapeHtml(data.author)}</abbr></span>`
-    : "";
+  let titleHtml = "";
+  if (data.title) {
+    if (data.hetiType === "ancient") {
+      const metaParts: string[] = [];
+      if (data.dynasty) metaParts.push(`（${escapeHtml(data.dynasty)}）`);
+      if (data.author) metaParts.push(escapeHtml(data.author));
+      const meta =
+        metaParts.length > 0
+          ? `\n  <div class="heti-meta">${metaParts.join(" ")}</div>`
+          : "";
+      titleHtml = `<h2 class="ancient-title">${escapeHtml(data.title)}</h2>${meta}`;
+    } else if (data.hetiType === "vertical") {
+      const metaParts: string[] = [];
+      if (data.dynasty)
+        metaParts.push(
+          `<span class="heti-dynasty-bracket">（${escapeHtml(data.dynasty)}）</span>`
+        );
+      if (data.author) metaParts.push(escapeHtml(data.author));
+      const meta =
+        metaParts.length > 0
+          ? `<span class="heti-meta">${metaParts.join(" ")}</span>`
+          : "";
+      titleHtml = `<h2>${escapeHtml(data.title)}${meta}</h2>`;
+    } else {
+      const metaParts: string[] = [];
+      if (data.dynasty) metaParts.push(`[${escapeHtml(data.dynasty)}]`);
+      if (data.author) metaParts.push(escapeHtml(data.author));
+      const meta =
+        metaParts.length > 0
+          ? `<span class="heti-meta">${metaParts.join(" ")}</span>`
+          : "";
+      titleHtml = `<h2 class="poetry-title">${escapeHtml(data.title)}${meta}</h2>`;
+    }
+  }
 
   const styleParts: string[] = [];
   if (data.font) styleParts.push(`--heti-font: ${data.font}`);
-  if (data.fontSize > 0) styleParts.push(`--heti-font-size: ${data.fontSize}px`);
-  if (data.charGap > 0) styleParts.push(`--heti-char-gap: ${data.charGap}em`);
-  const styleAttr = styleParts.length > 0 ? ` style="${styleParts.join("; ")}"` : "";
+  if (data.fontSize > 0)
+    styleParts.push(`--heti-font-size: ${data.fontSize}px`);
+  if (data.charGap > 0)
+    styleParts.push(`--heti-char-gap: ${data.charGap}em`);
+  const styleAttr =
+    styleParts.length > 0 ? ` style="${styleParts.join("; ")}"` : "";
 
-  return `${frontmatter}<div class="${containerClass}"${styleAttr}>
-  <h2>${escapeHtml(data.title)}${titleSpan}</h2>
+  return `<div class="${containerClass}"${styleAttr}>
+  ${titleHtml}
   <p class="heti-x-large">
 ${lines}
   </p>
 </div>`;
-}
-
-export function parseExistingPoem(
-  content: string,
-  frontmatter: Record<string, any>
-): PoemFormData {
-  const fmType = frontmatter?.heti || "poetry";
-  const dynasty = frontmatter?.朝代 || "";
-  const author = frontmatter?.作者 || "";
-  const font = frontmatter?.字体 || "";
-  const fontSize = typeof frontmatter?.字号 === "number" ? frontmatter.字号 : 0;
-  const charGap = typeof frontmatter?.字距 === "number" ? frontmatter.字距 : 0;
-
-  const titleMatch = content.match(/<h2>(.*?)<span/);
-  const title = titleMatch
-    ? titleMatch[1].replace(/<[^>]+>/g, "")
-    : "";
-
-  const bodyMatch = content.match(
-    /<p class="heti-x-large">([\s\S]*?)<\/p>/
-  );
-  const body = bodyMatch ? bodyMatch[1] : "";
-  const rawLines = body.split(/<br\s*\/?>/);
-
-  const lines: PoemLine[] = rawLines
-    .map((raw) => {
-      const clean = raw
-        .replace(/<span class="heti-hang">[^<]*<\/span>/g, "")
-        .trim();
-      if (!clean) return null;
-      const chars: CharData[] = [];
-      const regex = /<span class="heti-char">(?:<ruby>(.*?)<rt>(.*?)<\/rt><\/ruby>|(.*?))<\/span>|([^<])/g;
-      let match: RegExpExecArray | null;
-      while ((match = regex.exec(clean)) !== null) {
-        if (match[1] && match[2]) {
-          chars.push({ char: match[1], pinyin: match[2] });
-        } else if (match[3] !== undefined) {
-          chars.push({ char: match[3] });
-        } else if (match[4]) {
-          chars.push({ char: match[4] });
-        }
-      }
-      return chars.length > 0 ? { chars } : null;
-    })
-    .filter((l): l is PoemLine => l !== null);
-
-  return {
-    title,
-    hetiType: fmType as PoemFormData["hetiType"],
-    dynasty,
-    author,
-    font,
-    fontSize,
-    charGap,
-    lines: lines.length > 0 ? lines : [{ chars: [] }],
-  };
 }

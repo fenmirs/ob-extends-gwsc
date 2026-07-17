@@ -1,184 +1,148 @@
-# Obsidian Heti 中文排版增强
+# Obsidian Heti 中文诗词排版插件
 
-基于 [Heti CSS](https://sivan.github.io/heti/) 的 Obsidian 插件，为中文诗词和古文提供专业排版增强。
+为中文诗词、古文提供表单化编辑和专业排版渲染的 Obsidian 插件。使用自定义 `.sc` 文件格式，完全绕过 CM6 编辑器，通过表单 UI 编辑，自动渲染为排版精美的 HTML。
 
 ## 安装
 
-### 方式一：手动安装（推荐）
-
-1. 打开 Obsidian，进入你的 Vault
-2. 导航到 `.obsidian/plugins/` 目录（如不存在则创建）
-3. 将本项目整个文件夹复制到 `.obsidian/plugins/` 下，确保结构如下：
-
-```
-你的Vault/
-└── .obsidian/
-    └── plugins/
-        └── obsidian-heti/
-            ├── main.js
-            ├── manifest.json
-            ├── styles.css
-            └── assets/
-                └── heti.min.css
-```
-
-4. 重启 Obsidian
-5. 进入 `设置 → 第三方插件`，启用「Heti 中文排版增强」
-
-### 方式二：从源码构建
-
-1. 克隆本仓库
+### 从源码构建
 
 ```bash
 git clone <仓库地址>
 cd ob-extends
+npm install
 ```
 
-2. 安装依赖并构建
+### 构建命令
 
 ```bash
-npm install
-npm run build
+# 生产构建（打包 + 复制 CSS）
+powershell -Command "Copy-Item src\styles.css styles.css -Force; node esbuild.config.mjs production"
+
+# 开发模式（监听文件变化自动构建）
+powershell -Command "Copy-Item src\styles.css styles.css -Force; node esbuild.config.mjs"
 ```
 
-3. 构建产物为 `main.js`，将其与 `manifest.json`、`styles.css`、`assets/` 一起复制到 Vault 的 `.obsidian/plugins/obsidian-heti/` 目录
+构建产物为根目录下的 `main.js` 和 `styles.css`。
+
+### 部署到 Obsidian
+
+将以下文件复制到 Vault 的 `.obsidian/plugins/obsidian-heti/` 目录：
+
+```
+main.js
+manifest.json
+styles.css
+```
+
+重启 Obsidian，进入 `设置 → 第三方插件`，启用「Heti 中文诗词排版插件」。
 
 ## 使用
 
-### 快速开始
+### 新建诗词
 
-1. 按 `Ctrl+P`（macOS 为 `Cmd+P`）打开命令面板
-2. 输入「新建诗词」并回车
-3. 插件会自动创建一个带 frontmatter 和 HTML 模板的新文件
-4. 编辑器顶部会出现工具栏，点击按钮操作内容
-5. 切换到阅读模式查看排版效果
+按 `Ctrl+P`（macOS 为 `Cmd+P`）打开命令面板，输入「新建诗词」并回车。
 
-### Frontmatter 配置
+插件会在 `诗词/` 目录下创建 `.sc` 文件并自动打开编辑视图。
 
-每首诗词文件的开头需要包含 frontmatter，用于控制排版类型：
+### 编辑视图
 
-```yaml
----
-heti: poetry        # 排版类型（必填）
-朝代: 唐            # 可选
-作者: 李白          # 可选
----
+打开 `.sc` 文件后显示表单编辑界面：
+
+- **顶部工具栏**：切换「编辑」和「预览」模式
+- **表单字段**：标题、类型（诗词/古文/竖排）、字体、字号、字距、朝代、作者
+- **诗词行**：每行一个文本输入框，下方显示字符卡片
+- **字符卡片**：点击卡片打开拼音键盘，可添加/清除拼音
+- **拼音键盘**：选择声母、韵母、声调后确认
+- **添加行**：点击「+ 添加一行」按钮
+
+### 预览视图
+
+点击工具栏「预览」按钮，查看渲染后的排版效果：
+
+- 诗词格式：`[朝代] 作者` + 居中排版
+- 古文格式：标题 + `（朝代） 作者` 居中
+- 竖排格式：传统从右到左竖排
+- 拼音注音：使用 `<ruby>` 标签显示
+
+### 文件格式
+
+`.sc` 文件为纯 JSON 格式：
+
+```json
+{
+  "title": "静夜思",
+  "hetiType": "poetry",
+  "dynasty": "唐",
+  "author": "李白",
+  "font": "",
+  "fontSize": 0,
+  "charGap": 0,
+  "lines": [
+    {
+      "chars": [
+        { "char": "床" },
+        { "char": "前" },
+        { "char": "明", "pinyin": "míng" },
+        { "char": "月" },
+        { "char": "光" }
+      ]
+    }
+  ]
+}
 ```
 
-**排版类型说明：**
-
-| 值 | 说明 | 效果 |
-|---|---|---|
-| `poetry` | 诗词 | 适合五言/七言绝句、律诗等 |
-| `ancient` | 古文 | 适合散文、策论等长篇古文 |
-| `annotation` | 行间注 | 适合需要注音/注释的文本 |
-| `vertical` | 竖排 | 传统从右到左竖排排版 |
-
-### 编辑器工具栏
-
-当打开一个包含 `heti` frontmatter 的文件时，编辑器顶部会自动显示工具栏：
-
-| 按钮 | 功能 | 说明 |
+| 字段 | 类型 | 说明 |
 |------|------|------|
-| 📜 插入模板 | 插入诗词 HTML 骨架 | 如果文件没有 frontmatter 会自动生成 |
-| ↵ 换行 | 插入带标点悬挂的换行 | 自动处理句末标点的悬挂效果 |
-| 🔤 注音 | 为选中文字添加拼音 | 需要先选中文字 |
-| ⇅ 横竖排 | 切换横排/竖排 | 修改 frontmatter 中的 heti 值 |
+| `title` | string | 诗词标题 |
+| `hetiType` | string | 排版类型：`poetry`（诗词）、`ancient`（古文）、`vertical`（竖排） |
+| `dynasty` | string | 朝代 |
+| `author` | string | 作者 |
+| `font` | string | 字体名称（空为默认） |
+| `fontSize` | number | 字号 px（0 为默认） |
+| `charGap` | number | 字间距 em（0 为默认） |
+| `lines` | array | 诗词行数组 |
+| `lines[].chars` | array | 字符数组 |
+| `chars[].char` | string | 单个汉字 |
+| `chars[].pinyin` string? | 拼音（可选） |
 
-### 注音功能
+## 文件结构
 
-1. 在编辑器中选中需要注音的文字（如「茱萸」）
-2. 点击工具栏的「🔤 注音」按钮
-3. 在弹窗中输入拼音，支持两种格式：
-   - **统一拼音**：所有字使用相同拼音，输入 `zhū yú`
-   - **逐字拼音**：每个字单独指定，输入 `茱:zhū,萸:yú`
-4. 点击确认或按回车，选中文字会被替换为 `<ruby>` 标签
-
-### 编辑器内直接编辑
-
-你也可以不使用工具栏，直接在源码模式下编辑 HTML：
-
-```markdown
----
-heti: poetry
-朝代: 唐
-作者: 李白
----
-
-<div class="heti heti--poetry">
-  <h2>赠汪伦<span class="heti-meta heti-small">[唐]<abbr title="号青莲居士">李白</abbr></span></h2>
-  <p class="heti-x-large">
-    李白乘舟将欲行<span class="heti-hang">，</span><br>
-    忽闻岸上踏歌声<span class="heti-hang">。</span><br>
-    桃花潭水深千尺<span class="heti-hang">，</span><br>
-    不及汪伦送我情<span class="heti-hang">。</span>
-  </p>
-</div>
-```
-
-**常用 HTML class：**
-
-| class | 说明 |
-|-------|------|
-| `heti` | 基础排版样式 |
-| `heti--poetry` | 诗词排版 |
-| `heti--ancient` | 古文排版 |
-| `heti--annotation` | 行间注排版 |
-| `heti--vertical` | 竖排排版 |
-| `heti-x-large` | 大字号 |
-| `heti-hang` | 标点悬挂 |
-| `heti-meta heti-small` | 元信息（作者、朝代等） |
-| `heti-verse` | 诗节居中 |
-
-## 嵌入复用
-
-每首诗词是独立的 `.md` 文件，可以通过 Obsidian 的嵌入语法在其他笔记中引用：
-
-```markdown
-这是李白的诗：
-
-![[赠汪伦]]
-
-很棒吧！
-```
-
-嵌入的内容会自动继承 Heti 排版样式。
-
-## 文件结构建议
-
-建议在 Vault 中创建专门的目录管理诗词：
+建议在 Vault 中创建专门的目录：
 
 ```
 你的Vault/
 ├── 诗词/
-│   ├── 赠汪伦.md
-│   ├── 静夜思.md
-│   └── 出师表.md
-├── 日常笔记/
-│   └── 读书笔记.md    ← 可以通过 ![[赠汪伦]] 嵌入
-└── ...
+│   ├── 静夜思.sc
+│   ├── 赠汪伦.sc
+│   └── 出师表.sc
+└── 日常笔记/
+    └── 读书笔记.md
 ```
 
 ## 常见问题
 
-**Q: 工具栏不显示？**
-A: 确保文件的 frontmatter 中包含 `heti: xxx` 字段。工具栏仅在标记为 Heti 的文件中显示。
+**Q: .sc 文件双击打开后是空白？**
+A: 确保插件已启用。如果还是空白，尝试重启 Obsidian。
 
-**Q: 阅读模式下排版没有效果？**
-A: 同样需要 frontmatter 中有 `heti` 字段。插件通过该字段识别需要应用排版的文件。
+**Q: 如何在其他笔记中引用诗词？**
+A: 当前版本暂不支持 `![[]]` 嵌入 `.sc` 文件。后续可考虑添加阅读视图支持。
 
-**Q: 如何切换横排/竖排？**
-A: 点击工具栏「⇅ 横竖排」按钮，或手动修改 frontmatter 中 `heti: poetry` 为 `heti: vertical`。
+**Q: 拼音键盘不弹出？**
+A: 点击字符卡片（单个汉字方块）即可弹出拼音键盘。
 
-**Q: 普通 Markdown 文件会受影响吗？**
-A: 不会。插件仅对 frontmatter 中包含 `heti` 字段的文件生效，其他文件保持原生渲染。
+## 技术架构
 
-## 技术细节
+| 文件 | 职责 |
+|------|------|
+| `src/main.ts` | 插件入口，注册 `.sc` 扩展名和自定义视图 |
+| `src/sc-view.ts` | 自定义 ItemView，表单 UI + 预览 + 文件读写 |
+| `src/poem-data.ts` | 数据类型定义、JSON 序列化、HTML 渲染生成 |
+| `src/char-card.ts` | 字符卡片组件（汉字 + 拼音 + 删除按钮） |
+| `src/pinyin-keyboard.ts` | 拼音输入键盘（声母/韵母/声调选择） |
+| `src/font-detector.ts` | 系统中文字体检测 |
+| `src/styles.css` | 所有样式（表单、卡片、键盘、排版渲染） |
 
-- 基于 [Heti CSS](https://sivan.github.io/heti/) 排版引擎
-- 使用 Obsidian Plugin API（EditorView 装饰、MarkdownPostProcessor、Modal）
-- 构建工具：esbuild
-- TypeScript 编写
+**核心设计**：使用 Obsidian 的 `registerExtensions` 注册 `.sc` 文件类型，通过 `registerView` 绑定自定义 `ItemView`。编辑视图完全独立于 CM6 编辑器，通过 Vault API 直接读写文件。
 
 ## 开源协议
 

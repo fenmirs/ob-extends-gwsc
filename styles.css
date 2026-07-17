@@ -1,17 +1,22 @@
-.heti-toolbar {
+/* View container */
+.sc-view-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Toolbar */
+.sc-toolbar {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
-  background: var(--background-secondary);
+  padding: 8px 12px;
   border-bottom: 1px solid var(--background-modifier-border);
-  flex-wrap: wrap;
+  flex-shrink: 0;
 }
-.heti-toolbar-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+.sc-toolbar-btn {
+  padding: 4px 12px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 13px;
@@ -20,162 +25,123 @@
   border: none;
   transition: background 0.15s, color 0.15s;
 }
-.heti-toolbar-btn:hover {
+.sc-toolbar-btn:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
 }
-.heti-toolbar-btn.active {
+.sc-toolbar-btn.active {
   background: var(--interactive-accent);
   color: var(--text-on-accent);
 }
-.heti-ruby-modal .modal-content { padding: 16px; }
-.heti-ruby-modal h3 { margin-top: 0; }
-.heti-ruby-preview {
-  font-size: 24px;
-  text-align: center;
+
+/* Form wrapper */
+.sc-form-wrapper {
+  flex: 1;
+  overflow-y: auto;
   padding: 16px;
 }
-.heti-ruby-input-container label {
-  display: block;
-  margin-bottom: 4px;
-}
-.heti-ruby-input {
-  width: 100%;
-  margin-top: 8px;
-  padding: 8px;
-}
-.heti-ruby-buttons {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-  justify-content: flex-end;
-}
 
-.markdown-preview-section .heti { max-width: 100%; padding: 16px; }
-.markdown-preview-section .heti--vertical {
-  writing-mode: vertical-rl;
-  text-orientation: upright;
-  max-height: 80vh;
-  overflow-x: auto;
-}
-.markdown-preview-section .heti ruby { ruby-align: center; }
-.markdown-preview-section .heti rt { font-size: 0.5em; }
-
-/* 表单模式下隐藏编辑器文字和行号，保留 Widget */
-.heti-form-mode .cm-content > .cm-line:not(.cm-active),
-.heti-form-mode .cm-content > .cm-html-embed,
-.heti-form-mode .cm-content > .cm-fold-indicator {
-  display: none;
-}
-.heti-form-mode .cm-content .cm-hmd-frontmatter {
-  display: none;
-}
-.heti-form-mode .cm-content {
-  padding-bottom: 0 !important;
-  caret-color: transparent !important;
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  pointer-events: none !important;
-}
-.heti-form-mode .cm-content .cm-cursor,
-.heti-form-mode .cm-content .cm-widgetBuffer {
-  display: none;
-}
-.heti-form-mode .heti-poem-form {
-  pointer-events: auto !important;
-  caret-color: auto !important;
-  user-select: auto !important;
-}
-.heti-form-mode .cm-gutters,
-.heti-form-mode .cm-gutters-before {
-  display: none;
-}
-.heti-form-mode .heti-poem-form {
-  visibility: visible;
-}
-
-/* 表单区域 */
-.heti-poem-form {
+/* Preview wrapper */
+.sc-preview-wrapper {
+  flex: 1;
+  overflow-y: auto;
   padding: 16px;
 }
-.heti-form-row {
+
+/* Keyboard container */
+.sc-keyboard-container {
+  flex-shrink: 0;
+  border-top: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+}
+
+/* Form rows */
+.sc-form-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
-.heti-form-label {
-  min-width: 60px;
+.sc-form-label {
+  min-width: 48px;
   font-weight: 500;
   font-size: 14px;
+  color: var(--text-normal);
+  flex-shrink: 0;
 }
-.heti-form-input {
+.sc-form-input {
   flex: 1;
   padding: 6px 8px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
   background: var(--background-primary);
   color: var(--text-normal);
+  font-size: 14px;
 }
-.heti-form-select {
+.sc-form-select {
   padding: 6px 8px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
   background: var(--background-primary);
   color: var(--text-normal);
+  font-size: 14px;
 }
-.heti-form-lines {
+
+/* Lines */
+.sc-form-lines {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 16px;
 }
-.heti-form-line {
+.sc-form-line {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px;
+  gap: 6px;
+  padding: 10px;
   border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
+  border-radius: 6px;
+  background: var(--background-secondary);
 }
-.heti-form-line input {
-  flex: 1;
-}
-.heti-form-line-delete {
+.sc-form-line-delete {
   align-self: flex-end;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 16px;
-  padding: 2px 6px;
+  font-size: 18px;
+  padding: 0 6px;
+  line-height: 1;
 }
-.heti-form-line-delete:hover {
+.sc-form-line-delete:hover {
   color: var(--text-error);
 }
-.heti-form-add-line {
-  margin-top: 8px;
-  padding: 8px;
+
+/* Add line button */
+.sc-form-add-line {
+  margin-top: 12px;
+  padding: 10px;
   background: var(--background-secondary);
   border: 1px dashed var(--background-modifier-border);
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   color: var(--text-muted);
+  font-size: 14px;
 }
-.heti-form-add-line:hover {
+.sc-form-add-line:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
 }
 
-/* 单字卡片容器 */
-.heti-char-container {
+/* Char container */
+.sc-char-container {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  min-height: 40px;
+  min-height: 44px;
 }
 
-/* 单字卡片 */
+/* Char card */
 .heti-char-card {
   position: relative;
   display: flex;
@@ -186,6 +152,7 @@
   border-radius: 4px;
   cursor: pointer;
   min-width: 40px;
+  background: var(--background-primary);
   transition: border-color 0.15s, background 0.15s;
 }
 .heti-char-card:hover {
@@ -199,11 +166,13 @@
 .heti-char {
   font-size: 18px;
   font-weight: 500;
+  color: var(--text-normal);
 }
 .heti-char-pinyin {
   font-size: 11px;
   color: var(--text-muted);
   margin-top: 2px;
+  min-height: 14px;
 }
 .heti-char-delete {
   position: absolute;
@@ -229,33 +198,21 @@
   color: var(--text-on-accent);
 }
 
-/* 共享拼音键盘容器 */
-.heti-shared-keyboard {
-  margin-top: 8px;
-  position: sticky;
-  bottom: 0;
-  z-index: 100;
-  background: var(--background-primary);
-}
-
-/* 拼音键盘 */
+/* Pinyin keyboard */
 .heti-pinyin-keyboard {
-  padding: 8px;
+  padding: 10px;
   border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--background-secondary);
-  margin-top: 4px;
 }
 .heti-pinyin-preview {
-  padding: 8px;
+  padding: 10px;
   text-align: center;
   font-size: 18px;
   font-weight: 500;
+  color: var(--text-normal);
   border-bottom: 1px solid var(--background-modifier-border);
   margin-bottom: 8px;
-}
-.heti-pinyin-text {
-  color: var(--text-normal);
 }
 .heti-pinyin-row {
   display: flex;
@@ -309,27 +266,53 @@
   color: var(--text-normal);
 }
 
-/* 诗词字体和字号配置 */
+/* Rendered poem (preview) */
 .heti {
+  max-width: 100%;
+  padding: 16px;
   font-family: var(--heti-font, inherit);
-}
-.heti .heti-x-large {
-  font-size: var(--heti-font-size, inherit);
 }
 .heti h2 {
   font-size: calc(var(--heti-font-size, 24px) * 1.5);
+  margin: 0 0 0.25em;
+}
+.poetry-title,.ancient-title{
+  text-align: center;
+  padding-bottom: 0.5em;
+}
+.heti .heti-x-large {
+  font-size: var(--heti-font-size, 20px);
+  line-height: 1.8;
 }
 .heti .heti-meta {
   font-size: calc(var(--heti-font-size, 24px) * 0.75);
+  margin-left: 0.5em;
+  color: var(--text-muted);
 }
-
-/* 字符标签 */
+.heti--ancient .heti-meta {
+  display: block;
+  text-align: center;
+  margin-left: 0;
+  margin-top: 0.25em;
+}
+.heti--vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  max-height: 80vh;
+  overflow-x: auto;
+}
+.heti--vertical .heti-dynasty-bracket {
+  writing-mode: horizontal-tb;
+}
+.heti ruby {
+  ruby-align: center;
+}
+.heti rt {
+  font-size: 0.5em;
+}
 .heti {
   --heti-char-gap: 0.25em;
 }
 .heti-char {
   margin-right: var(--heti-char-gap);
-}
-.heti-char ruby {
-  ruby-align: center;
 }

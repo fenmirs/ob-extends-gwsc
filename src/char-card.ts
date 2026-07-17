@@ -23,24 +23,24 @@ export class CharCard {
     this.container = document.createElement("div");
     this.container.className = "heti-char-card";
 
-    this.charEl = this.container.createEl("div", {
-      cls: "heti-char",
-      text: data.char,
-    });
+    this.charEl = document.createElement("div");
+    this.charEl.className = "heti-char";
+    this.charEl.textContent = data.char;
+    this.container.appendChild(this.charEl);
 
-    this.pinyinEl = this.container.createEl("div", {
-      cls: "heti-char-pinyin",
-      text: data.pinyin || "",
-    });
+    this.pinyinEl = document.createElement("div");
+    this.pinyinEl.className = "heti-char-pinyin";
+    this.pinyinEl.textContent = data.pinyin || "";
+    this.container.appendChild(this.pinyinEl);
 
-    this.deleteBtn = this.container.createEl("div", {
-      cls: "heti-char-delete",
-      text: "×",
-    });
+    this.deleteBtn = document.createElement("div");
+    this.deleteBtn.className = "heti-char-delete";
+    this.deleteBtn.textContent = "\u00d7";
     this.deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.onDelete();
     });
+    this.container.appendChild(this.deleteBtn);
 
     this.container.addEventListener("click", () => this.onCardClick());
 
