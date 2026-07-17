@@ -19,6 +19,11 @@ export const SC_VIEW_TYPE = "heti-sc-view";
 export class ScView extends ItemView {
   private formData: PoemFormData = createEmptyForm();
   private charCards: CharCard[][] = [[]];
+  private lineRefs: {
+    lineEl: HTMLElement;
+    charContainer: HTMLElement;
+    textarea: HTMLTextAreaElement;
+  }[] = [];
   private keyboardContainer: HTMLElement | null = null;
   private sharedKeyboard: PinyinKeyboard | null = null;
   private activeCard: CharCard | null = null;
@@ -151,9 +156,9 @@ export class ScView extends ItemView {
     }
   }
 
-  private rebuildCharCards() {
-    this.charCards = this.formData.lines.map((line, lineIndex) => {
-      return line.chars.map((charData, charIndex) => {
+  private rebuildCharCards(targetLineIndex?: number) {
+    const buildLine = (lineIndex: number) => {
+      return this.formData.lines[lineIndex].chars.map((charData, charIndex) => {
         const card = new CharCard(
           charData,
           (updated) => {
@@ -161,21 +166,14 @@ export class ScView extends ItemView {
             this.syncToFile();
           },
           () => {
-            const activeEl = document.activeElement as HTMLElement;
-            const focusLine = activeEl?.closest?.(".sc-form-line") as HTMLElement;
-            const focusIndex = focusLine
-              ? Array.from(focusLine.parentElement!.children).indexOf(focusLine)
-              : -1;
             this.formData.lines[lineIndex].chars.splice(charIndex, 1);
             this.rebuildCharCards();
             this.renderForm();
             this.syncToFile();
-            if (focusIndex >= 0) {
-              const lines = this.formEl!.querySelectorAll(".sc-form-line");
-              const input = lines[focusIndex]?.querySelector("input");
-              if (input)
-                requestAnimationFrame(() => (input as HTMLInputElement).focus());
-            }
+            requestAnimationFrame(() => {
+              const ref = this.lineRefs[lineIndex];
+              if (ref?.textarea) ref.textarea.focus();
+            });
           }
         );
         card.setOnCardClick(() =>
@@ -183,7 +181,20 @@ export class ScView extends ItemView {
         );
         return card;
       });
-    });
+    };
+
+    if (targetLineIndex !== undefined) {
+      this.charCards[targetLineIndex] = buildLine(targetLineIndex);
+      const ref = this.lineRefs[targetLineIndex];
+      if (ref) {
+        ref.charContainer.empty();
+        this.charCards[targetLineIndex].forEach((card) =>
+          ref.charContainer.appendChild(card.getElement())
+        );
+      }
+    } else {
+      this.charCards = this.formData.lines.map((_, i) => buildLine(i));
+    }
   }
 
   private openKeyboard(card: CharCard, lineIndex: number, charIndex: number) {
@@ -235,6 +246,7 @@ export class ScView extends ItemView {
   private renderForm() {
     if (!this.formEl) return;
     this.formEl.empty();
+    this.lineRefs = [];
     this.closeKeyboard();
 
     this.renderMetaFields();
@@ -397,16 +409,16 @@ export class ScView extends ItemView {
     lineIndex: number
   ) {
     const lineEl = container.createEl("div", { cls: "sc-form-line" });
+    lineEl.dataset.lineIndex = String(lineIndex);
 
-    const inputEl = lineEl.createEl("input", {
-      cls: "sc-form-input",
-      type: "text",
+    const textarea = lineEl.createEl("textarea", {
+      cls: "sc-form-textarea",
       placeholder: `第 ${lineIndex + 1} 句`,
     });
-    inputEl.value = charsToText(line.chars);
+    textarea.value = charsToText(line.chars);
 
-    inputEl.addEventListener("input", () => {
-      const newText = inputEl.value;
+    textarea.addEventListener("input", () => {
+      const newText = textarea.value;
       const oldChars = this.formData.lines[lineIndex].chars;
       const newChars = textToChars(newText);
       this.formData.lines[lineIndex] = {
@@ -416,8 +428,7 @@ export class ScView extends ItemView {
             oldChars[i]?.char === nc.char ? oldChars[i].pinyin : undefined,
         })),
       };
-      this.rebuildCharCards();
-      this.renderForm();
+      this.rebuildCharCards(lineIndex);
       this.syncToFile();
     });
 
@@ -427,16 +438,31 @@ export class ScView extends ItemView {
       charContainer.appendChild(card.getElement());
     });
 
+    this.lineRefs[lineIndex] = { lineEl, charContainer, textarea };
+
+    const footer = lineEl.createEl("div", { cls: "sc-form-line-footer" });
+
+    const toggleBtn = footer.createEl("button", {
+      cls: "sc-form-line-toggle",
+      text: "\u25BC",
+    });
+    toggleBtn.addEventListener("click", () => {
+      lineEl.toggleClass("collapsed", !lineEl.hasClass("collapsed"));
+      toggleBtn.textContent = lineEl.hasClass("collapsed") ? "\u25B6" : "\u25BC";
+    });
+
     if (this.formData.lines.length > 1) {
-      const deleteBtn = lineEl.createEl("button", {
+      const deleteBtn = footer.createEl("button", {
         cls: "sc-form-line-delete",
         text: "\u00d7",
       });
       deleteBtn.addEventListener("click", () => {
-        this.formData.lines.splice(lineIndex, 1);
-        this.charCards.splice(lineIndex, 1);
-        this.renderForm();
-        this.syncToFile();
+        if (confirm(`确定删除第 ${lineIndex + 1} 段(行)？`)) {
+          this.formData.lines.splice(lineIndex, 1);
+          this.charCards.splice(lineIndex, 1);
+          this.renderForm();
+          this.syncToFile();
+        }
       });
     }
   }
@@ -444,7 +470,7 @@ export class ScView extends ItemView {
   private renderAddButton() {
     const btn = this.formEl!.createEl("button", {
       cls: "sc-form-add-line",
-      text: "+ 添加一行",
+      text: "+ 添加一段(行)",
     });
     btn.addEventListener("click", () => {
       this.formData.lines.push({ chars: [] });
