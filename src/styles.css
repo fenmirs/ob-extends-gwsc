@@ -37,6 +37,14 @@
   color: var(--text-on-accent);
 }
 
+.sc-toolbar-separator {
+  width: 1px;
+  height: 18px;
+  background: var(--background-modifier-border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
 /* Form wrapper */
 .sc-form-wrapper {
   flex: 1;
@@ -49,6 +57,14 @@
   flex: 1;
   overflow-y: auto;
   padding: 16px;
+}
+
+.sc-export-bar {
+  display: flex;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: 12px;
 }
 
 /* Keyboard container */
@@ -368,13 +384,13 @@
 
 .heti--vertical .heti-line {
   display: block;
-  text-indent: 2.5em;
+  text-indent: 2em;
   margin-left: 1em;
 }
 
 .heti--ancient .heti-line {
   display: block;
-  text-indent: 2.5em;
+  text-indent: 2em;
   margin-bottom: 1em;
 }
 

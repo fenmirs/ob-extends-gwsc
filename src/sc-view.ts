@@ -12,6 +12,7 @@ import {
 import { CharCard } from "./char-card";
 import { PinyinKeyboard } from "./pinyin-keyboard";
 import { getAvailableChineseFonts } from "./font-detector";
+import { exportAsHtml } from "./export";
 
 export const SC_VIEW_TYPE = "heti-sc-view";
 
@@ -23,6 +24,7 @@ export class ScView extends ItemView {
   private activeCard: CharCard | null = null;
   private formEl: HTMLElement | null = null;
   private previewEl: HTMLElement | null = null;
+  private exportBar: HTMLElement | null = null;
   private mode: "edit" | "preview" = "edit";
   private file: TFile | null = null;
 
@@ -72,6 +74,14 @@ export class ScView extends ItemView {
     });
 
     this.formEl = container.createEl("div", { cls: "sc-form-wrapper" });
+
+    this.exportBar = container.createEl("div", { cls: "sc-export-bar" });
+    this.exportBar.style.display = "none";
+    this.exportBar.createEl("button", {
+      cls: "sc-toolbar-btn",
+      text: "导出 HTML",
+    }).addEventListener("click", () => exportAsHtml(this.formData));
+
     this.previewEl = container.createEl("div", {
       cls: "sc-preview-wrapper",
     });
@@ -124,11 +134,13 @@ export class ScView extends ItemView {
 
   private showEdit() {
     if (this.formEl) this.formEl.style.display = "";
+    if (this.exportBar) this.exportBar.style.display = "none";
     if (this.previewEl) this.previewEl.style.display = "none";
   }
 
   private showPreview() {
     if (this.formEl) this.formEl.style.display = "none";
+    if (this.exportBar) this.exportBar.style.display = "";
     if (this.keyboardContainer) {
       this.keyboardContainer.style.display = "none";
       this.keyboardContainer.empty();
